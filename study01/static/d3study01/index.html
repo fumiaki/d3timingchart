@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>STUDY01</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="">
+    <script src="/lib/d3/d3.min.js"></script>
+
+  </head>
+  <body>
+    <p>Study01</p>
+    <form name="study01">
+      <input type="button" value="ChangeColor" onClick="changeColor()"></input>
+      <input type="button" value="ChangeRadius" onClick="changeRadius()"></input>
+      <input type="button" value="Random" onClick="random()"></input>
+      <input type="button" value="BindData" onClick="bindData()"></input>
+      <input type="button" value="AddCircle" onClick="addCircle()"></input>
+      <input type="button" value="RemoveCircle" onClick="removeCircle()"></input>
+      <input type="button" value="Transition" onClick="transition()"></input>
+    </form>
+
+    <svg width="720" height="120">
+      <circle cx="40" cy="60" r="10"></circle>
+      <circle cx="80" cy="60" r="10"></circle>
+      <circle cx="120" cy="60" r="10"></circle>
+    </svg>
+
+    <script>
+      var svg = d3.select("svg");
+      //var circle = svg.selectAll("circle");
+
+      function changeColor() {
+        svg.selectAll("circle")
+          .style("fill", "steelblue");
+      }
+
+      function changeRadius() {
+        svg.selectAll("circle")
+          .attr("r", 30);
+      }
+
+      function random() {
+        svg.selectAll("circle")
+          .transition()
+          .attr("cx", function() { return Math.random() * 720;});
+      }
+
+      function bindData() {
+        svg.selectAll("circle")
+          .data([32, 57, 112])
+          .attr("r", function(d) { return Math.sqrt(d)})
+          .attr("cx", function(d, i) { return i * 100 + 30});
+      }
+
+      function addCircle() {
+        svg.selectAll("circle")
+          .data([32, 57, 112, 293]).enter().append("circle")
+          .attr("cy", 60)
+          .attr("cx", function(d, i) { return i * 100 + 30})
+          .attr("r", function(d) { return Math.sqrt(d)});
+      }
+
+      function removeCircle() {
+        svg.selectAll("circle")
+          .data([32, 57]).exit()
+          .remove();
+      }
+
+      function transition() {
+        svg.selectAll("circle")
+          .transition().style("fill", "red");
+      }
+
+
+    </script>
+  </body>
+</html>

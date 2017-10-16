@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>STUDY01</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="">
+    <script src="/lib/d3/d3.min.js"></script>
+
+  </head>
+  <body>
+    <h1>Timing Chart</h1>
+    <form name="study01">
+      <input type="button" value="<=" onClick="prev()"></input>
+      <input type="button" value="=>" onClick="next()"></input>
+      <input type="button" value="+" onClick="zoomIn()"></input>
+      <input type="button" value="-" onClick="zoomOut()"></input>
+      <input type="button" value="reset" onClick="resetScale()"></input>
+    </form>
+    <svg width="640" height="480">
+      <svg id="labelArea" x="0" y="0" width="160" height="480">
+        <rect width="640" height="480" style="fill:#dddddd"/>
+      </svg>
+
+      <svg id="chartArea" x="160" y="0" width="480" height="480" viewBox="0 0 480 480" preserveAspectRatio="none">
+        <g style="stroke:black; stroke-width:0.5">
+          <rect width="640" height="480" style="fill:#dddddd"/>
+          <path d="M0,40 h640"/>
+          <path d="M0,80 h640"/>
+          <path d="M0,120 h640"/>
+          <path d="M0,160 h640"/>
+          <path d="M0,200 h640"/>
+          <path d="M0,240 h640"/>
+          <path d="M0,280 h640"/>
+          <path d="M0,320 h640"/>
+          <path d="M0,360 h640"/>
+          <path d="M0,400 h640"/>
+          <path d="M0,440 h640"/>
+        </g>
+
+        <g id="lane_1" transform="translate(0, 200)" style="stroke:blue; stroke-width:2; fill:#ffc000">
+          <path d="M-100,0
+            L740,0"/>
+            <text x="100" y="-100" transform="scale(1, 1)">ABC</text>
+        </g>
+        <g id="lane_2" transform="translate(0, 400)" style="stroke:blue; stroke-width:2; fill:rgb(146,208,80)">
+          <path d="M-100,0
+            L740,0"/>
+        </g>
+      </svg>
+    </svg>
+    <script>
+      var sampleData1 = [
+        {t:0, v:3},
+        {t:2, v:4},
+        {t:2.5, v:4},
+        {t:5.5, v:1},
+        {t:8, v:2},
+        {t:9, v:2},
+        {t:10, v:3},
+        {t:13, v:3}
+      ]
+
+      var sampleData2 = [
+        {t:0, v:3},
+        {t:2, v:3},
+        {t:3.9, v:4},
+        {t:4.4, v:4},
+        {t:7.4, v:1},
+        {t:7.5, v:1},
+        {t:9.5, v:2},
+        {t:10, v:2},
+        {t:11, v:3},
+        {t:13, v:3}
+      ]
+
+      var svg = d3.select("#chartArea");
+      svg.select("rect")
+        .call(d3.drag()
+          .on("start", dragStarted)
+          .on("drag", dragged)
+          .on("end", dragEnded)
+        );
+
+
+      var lane1 = d3.select("#lane_1");
+      var lane2 = d3.select("#lane_2");
+
+      var xScale = d3.scaleLinear();
+      var yScale = d3.scaleLinear();
+
+      var origX = 0;
+      var zoomX = 1;
+
+      padding(sampleData1);
+      padding(sampleData2);
+      resetScale();
+
+      function prev() {
+        origX = origX + 50;
+        _setScale();
+      }
+
+      function next() {
+        origX = origX - 50;
+        _setScale();
+      }
+
+      function zoomIn() {
+        zoomX = zoomX + 0.1;
+        _setScale();
+      }
+
+      function zoomOut() {
+        zoomX = zoomX - 0.1;
+        _setScale();
+      }
+
+      function resetScale() {
+        origX = 0;
+        zoomX = 1;
+        _setScale();
+      }
+
+      function _setScale() {
+        xScale
+          .domain([0, 13])
+          .range([origX * zoomX, (origX + 640) * zoomX]);
+        yScale
+          .domain([0, 1])
+          .range([0, -40]);
+
+        drawChart(lane1, sampleData1);
+        drawChart(lane2, sampleData2);
+      }
+
+      function padding(data) {
+        // チャートの前後に予備データ追加（塗りつぶしの始点をY=0に合わせるため
+        console.log(d3.min(data, function(d){return d.t}));
+        console.log(d3.max(data, function(d){return d.t}));
+        data.unshift({t:d3.min(data, function(d){return d.t}), v:0});
+        data.push({t:d3.max(data, function(d){return d.t}), v:0});
+      }
+
+      function drawChart(lane, data) {
+        var pathString = d3.line()
+          .x(function(d) {return xScale(d.t)})
+          .y(function(d) {return yScale(d.v)});
+
+        lane.select("path")
+          //.transition()
+          .attr("d", pathString(data));
+      }
+
+      var sx = 0;
+
+      function dragStarted(d) {
+        //console.log("Drag Started!");
+        d3.select(this).style("fill", "#ffff00");
+        sx = d3.event.x;
+      }
+
+      function dragged(d) {
+        //console.log("Dragged!");
+        //console.log(d3.event.x - sx);
+        origX = origX + (d3.event.x - sx);
+        sx = d3.event.x;
+        _setScale();
+      }
+
+      function dragEnded(d) {
+        //console.log("Drag Ended!");
+        d3.select(this).style("fill", "#dddddd");
+      }
+
+    </script>
+  </body>
+</html>
