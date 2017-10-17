@@ -12,9 +12,12 @@ button {
 
 // SVG Style
 svg {
+  stroke: #616161;
+}
+
+text {
   font-family: meiryo;
   font-size: 1.25rem;
-  stroke: #616161;
 }
 
 .chart path {
@@ -39,14 +42,20 @@ svg {
   marker-end: url('#linkArrow');
 }
 
-.tick {
+.tick line {
   stroke: #9E9E9E;
   stroke-width: 0.5;
   stroke-dasharray: 3;
   fill: none;
 }
 
+.tick text {
+  font-size: 0.8rem;
+}
+
 .background {
+  stroke: #9E9E9E;
+  stroke-width: 0.5;
   fill: #EEEEEE;
 }
 

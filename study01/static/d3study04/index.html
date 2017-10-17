@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>STUDY01</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="timingChart.css">
+    <script src="/lib/d3/d3.min.js"></script>
+    <script src="timingChart.js"></script>
+
+  </head>
+  <body>
+    <h1>Timing Chart</h1>
+    <form name="study01">
+      <button type="button" onClick="prev()">prev</button>
+      <button type="button" onClick="next()">next</button>
+      <button type="button" onClick="TimingChart.zoomIn()">+</button>
+      <button type="button" onClick="TimingChart.zoomOut()">-</button>
+      <button type="button" onClick="TimingChart.resetDisplay()">reset</button>
+    </form>
+
+    <svg id="chart" width="320" height="240">
+      <g transform="translate(0, 0)">
+
+        <g id="plotBackPane" class="plotBackPane" transform="translate(100, 100)">
+          <rect class="background" width="100" height="40"/>
+        </g>
+
+        <g id="xAxis" class="x axis" transform="translate(0,0)">
+          <rect class="background" width="100" height="40"/>
+          <g class="tick" transform="translate(100, 0)">
+            <line y2="100"></line>
+            <text y="50">ABCDE</text>
+          </g>
+          <g class="tick" transform="translate(200, 0)">
+            <line y2="100"></line>
+            <text y="50">12345</text>
+          </g>
+          <g class="tick" transform="translate(300, 0)">
+            <line y2="100"></line>
+            <text y="50">あいうえお</text>
+          </g>
+
+        </g>
+
+        <g id="yAxis" class="y axis" transform="translate(0,100)">
+          <rect class="background" width="100" height="40"/>
+          <g class="tick" transform="translate(0, 100)">
+            <line x2="100"></line>
+            <text x="100">ABCDE</text>
+          </g>
+          <g class="tick" transform="translate(0, 200)">
+            <line x2="100"></line>
+            <text x="100">12345</text>
+          </g>
+          <g class="tick" transform="translate(0, 300)">
+            <line x2="100"></line>
+            <text x="100">あいうえお</text>
+          </g>
+        </g>
+
+        <g id="plotPane" class="chart" transform="translate(100, 100)">
+          <circle id="test" cx="100" cy="100" r="40"></circle>
+          <text id="test2" x="100" y="200">あいうえお</text>
+        </g>
+      </g>
+    </svg>
+
+    <script>
+    var sampleData =
+    [
+      {
+        name: "ROBOT 1",
+        //color: "rgb(146,208,80)",
+        color: "cyan",
+        data: [
+          {t:0, v:3},
+          {t:2, v:4},
+          {t:2.5, v:4},
+          {t:5.5, v:1},
+          {t:8, v:2},
+          {t:9, v:2},
+          {t:10, v:3},
+          {t:13, v:3}
+        ]
+      },
+      {
+        name: "ROBOT 2",
+        //color: "#ffc000",
+        color: "orange",
+        data: [
+          {t:0, v:3},
+          {t:2, v:3},
+          {t:3.9, v:4},
+          {t:4.4, v:4},
+          {t:7.4, v:1},
+          {t:7.5, v:1},
+          {t:9.5, v:2},
+          {t:10, v:2},
+          {t:11, v:3},
+          {t:13, v:3}
+        ]
+      }
+    ];
+
+    TimingChart.init({width: 800});
+    TimingChart.setData(sampleData);
+
+    </script>
+  </body>
+</html>

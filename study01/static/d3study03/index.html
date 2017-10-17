@@ -11,24 +11,27 @@
   <body>
     <h1>Timing Chart</h1>
     <form name="study01">
-      <input type="button" value="<=" onClick="prev()"></input>
-      <input type="button" value="=>" onClick="next()"></input>
-      <input type="button" value="+" onClick="zoomIn()"></input>
-      <input type="button" value="-" onClick="zoomOut()"></input>
-      <input type="button" value="reset" onClick="resetScale()"></input>
+      <button type="button" onClick="prev()">prev</button>
+      <button type="button" onClick="next()">next</button>
+      <button type="button" onClick="zoomIn()">+</button>
+      <button type="button" onClick="zoomOut()">-</button>
+      <button type="button" onClick="resetScale()">reset</button>
     </form>
     <svg width="640" height="480">
       <svg id="labelArea" x="0" y="0" width="160" height="480">
         <rect class="background" width="640" height="480"/>
+        <text x="100" y="100">ABCDE</text>
+        <text x="100" y="200">12345</text>
+        <text x="100" y="300">あいうえお</text>
       </svg>
 
       <svg id="chartArea" x="160" y="0" width="480" height="480" viewBox="0 0 480 480" preserveAspectRatio="none">
         <defs>
-          <marker id="chartMarker" viewBox="-4 -4 8 8" refX="0" refY="0" markerUnits="strokeWidth" markerWidth="4" markerHeight="4">
+          <marker id="chartMarker" viewBox="-4 -4 8 8" refX="0" refY="0" markerUnits="userSpaceOnUse" markerWidth="4" markerHeight="4">
             <circle class="marker" r="4"/>
           </marker>
-          <marker id="linkArrow" viewBox="-4 -4 8 8" refX="0" refY="0" orient="auto" markerUnits="strokeWidth" markerWidth="16" markerHeight="16">
-            <path class="marker" d="M-4,2 L0,0 L-4,-2" stroke="red"/>
+          <marker id="linkArrow" viewBox="-8 -8 16 16" refX="0" refY="0" orient="auto" markerUnits="userSpaceOnUse" markerWidth="32" markerHeight="32">
+            <path class="marker" d="M-8,4 L0,0 L-8,-4"/>
           </marker>
         </defs>
         <g class="tick">
@@ -48,7 +51,7 @@
 
         <g id="lane_1" class="chart" transform="translate(0, 200)">
           <path d="M-100,0 L740,0"/>
-          <text x="100" y="-100" transform="scale(1, 1)">ABC</text>
+          <text x="100" y="-100">ABC</text>
         </g>
         <g id="lane_2" class="chart" transform="translate(0, 400)">
           <path d="M-100,0 L740,0"/>
@@ -81,7 +84,7 @@
         {
           name: "ROBOT 2",
           //color: "#ffc000",
-          color: "violet",
+          color: "orange",
           data: [
             {t:0, v:3},
             {t:2, v:3},
