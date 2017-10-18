@@ -9,6 +9,8 @@ var TimingChart = (function(d3) {
 
   var _data = undefined;
 
+  var _yUnit = 32;
+
   function _createConfigObject(configParam) {
 
     // Create default config object
@@ -28,7 +30,7 @@ var TimingChart = (function(d3) {
       yAxis: {
         x: 0,
         get y() {return _config.xAxis.height} ,
-        width: 160,
+        width: 240,
         get height() {return _config.height - _config.xAxis.height}
       },
 
@@ -46,28 +48,58 @@ var TimingChart = (function(d3) {
 
   function _init(configParam) {
     _createConfigObject(configParam);
+    _createSVGElement();
+    _setSVGElementSize();
+    _setEventHandler();
 
-    _svg = d3.select("#chart")
+    //_updateDisplay();
+  };
+
+  function _createSVGElement() {
+    _svg = d3.select("#chart");
+    _xAxis = _svg.select("#xAxis");
+    _yAxis = _svg.select("#yAxis");
+    _plotPane = _svg.select("#plotPane");
+
+    // create clipPath
+    var defs = _svg.append("defs");
+    defs.append("clipPath")
+      .attr("id", "chart-clip")
+      .append("rect");
+    defs.append("clipPath")
+      .attr("id", "xAxis-clip")
+      .append("rect");
+    defs.append("clipPath")
+      .attr("id", "yAxis-clip")
+      .append("rect");
+
+  }
+
+  function _setSVGElementSize() {
+
+    _svg
       .attr("width", _config.width)
+      //.attr("width", "100%")
       .attr("height", _config.height);
 
 
-    _xAxis = _svg.select("#xAxis")
-      .attr("transform", "translate(" + _config.xAxis.x + "," + _config.xAxis.y + ")");
+    _xAxis
+      .attr("transform", "translate(" + _config.xAxis.x + "," + _config.xAxis.y + ")")
+      .attr('clip-path', 'url(#xAxis-clip)');
     _xAxis.select(".background")
       .attr("width", _config.xAxis.width)
       .attr("height", _config.xAxis.height);
-    _xAxis.selectAll(".tick")
-      .select("line")
+    _xAxis.selectAll(".tick line")
+      .attr("y1", _config.xAxis.height)
       .attr("y2", _config.height);
 
-    _yAxis = _svg.select("#yAxis")
-      .attr("transform", "translate(" + _config.yAxis.x + "," + _config.yAxis.y + ")");
+    _yAxis
+      .attr("transform", "translate(" + _config.yAxis.x + "," + _config.yAxis.y + ")")
+      .attr('clip-path', 'url(#yAxis-clip)');
     _yAxis.select(".background")
       .attr("width", _config.yAxis.width)
       .attr("height", _config.yAxis.height);
-    _yAxis.selectAll(".tick")
-      .select("line")
+    _yAxis.selectAll(".tick line")
       .attr("x2", _config.width);
 
     _svg.select("#plotBackPane")
@@ -76,9 +108,27 @@ var TimingChart = (function(d3) {
       .attr("width", _config.plotPane.width)
       .attr("height", _config.plotPane.height);
 
-    _plotPane = _svg.select("#plotPane")
-      .attr("transform", "translate(" + _config.plotPane.x + "," + _config.plotPane.y + ")");
+    _plotPane
+      .attr("transform", "translate(" + _config.plotPane.x + "," + _config.plotPane.y + ")")
+      .attr('clip-path', 'url(#chart-clip)');
 
+
+    // clipPath
+    d3.select("#chart-clip rect")
+      .attr("width", _config.plotPane.width)
+      .attr("height", _config.plotPane.height);
+    d3.select("#xAxis-clip rect")
+      .attr("width", _config.xAxis.width)
+      .attr("height", _config.height);
+    d3.select("#yAxis-clip rect")
+      .attr("width", _config.width)
+      .attr("height", _config.yAxis.height);
+
+
+
+  };
+
+  function _setEventHandler() {
     // Drag operation setting
     _svg.call(d3.drag()
       .on("start", dragStarted)
@@ -86,60 +136,135 @@ var TimingChart = (function(d3) {
       .on("end", dragEnded)
     );
 
-    //###### TEST ########
-    _xAxis.selectAll(".tick")
-      .data([1, 5, 10]);
 
-    _yAxis.selectAll(".tick")
-      .data([1, 2, 3]);
+    // Handle window resize event
+    d3.select(window)
+      .on("resize", function() {
+        //####TEST####
+        console.log("resized!");
+        var width = _svg.node().getBoundingClientRect().width;
+        console.log("window.innerWidth : " + window.innerWidth);
+        console.log("svg.getBoundingClientRect.width : " + _svg.node().getBoundingClientRect().width);
+        //_svg.attr("width", window.innerWidth);
+        //########
 
-    //####################
+        _config.width = window.innerWidth;
+        _config.height = window.innerHeight;
 
-    _updateDisplay();
+        _setSVGElementSize();
+        _updateDisplay();
+
+      });
   };
+
 
   function _setData(data) {
     _data = data;
-    _data.forEach(function(v, i, a){
-      _padData(v.data);
-      _offsetData(v.data, v.yOffset)
+
+    // Compute domain range and offset position
+    var yMargin = 2;
+    var yOffset = 0;
+
+    var rangeArray = _data.map(function(elem) {
+      elem.xRange = d3.extent(elem.data, function(d){return d.t});
+      elem.yRange = d3.extent(elem.data, function(d){return d.v});
+
+      yOffset = yOffset - elem.yRange[1] - yMargin;
+      elem.yOffset = yOffset;
+
+      // Add Lane Separator (Lane Label)
+      var laneLabel = {v: elem.yRange[1] + 1.5, label: elem.name, type: "separator"};
+      elem.yLabels.push(laneLabel);
+      return {id: elem.id, x: elem.xRange, y: elem.yRange};
     });
+    //console.log(rangeArray);
 
-    _plotPane.selectAll("path")
-      .data(_data)
-      .enter().append("path");
-
-      if(!_data) {
-        return;
-      }
-
-      var maxArray = _data.map(function(elem) {
-        return d3.max(elem.data, function(d){return d.v});
-        //return Math.max.apply(null, elem.data.map(function(elm2) {
-        //  return elm2.v;
-        //}));
-      });
-      console.log(maxArray);
-
+    _data.xRange = d3.extent(
+      d3.merge(
+        _data.map(function(elem) {return elem.xRange})
+      )
+    );
+    //console.log(xRange);
+    _data.yRange = [yOffset - yMargin, 0];
 
     _xScale
-      .domain([0, 13]);
+      .domain(_data.xRange);
 
     _yScale
-      .domain([0, 10]);
+      .domain(_data.yRange);
+
+    // Preprocess data
+    _data.forEach(function(d, i, a){
+      _padData(d);
+      _offsetData(d);
+    });
+
+    // SetUp xAxis
+    var xTicks = _xAxis.selectAll(".tick");
+    //xTicks.remove();
+    xTicks
+      .data(d3.range(_data.xRange[0], _data.xRange[1], 1))
+      .enter()
+      .call(function(selection) {
+        // create x-tick element
+        var g = selection.append("g")
+          .classed("tick", true);
+        g.append("line")
+          .attr("y1", _config.xAxis.height)
+          .attr("y2", _config.height);
+        g.append("text")
+          .attr("y", _config.xAxis.height - 8)
+          .text(function(d){return d});
+      });
+
+    // SetUp yAxis
+    var tickLabels = d3.merge(
+      _data.map(function(elem) {
+        return elem.yLabels;
+      })
+    );
+    //console.log(tickLabels);
+
+    var yTicks = _yAxis.selectAll(".tick");
+    //yTicks.remove();
+    yTicks
+      .data(tickLabels)
+      .enter()
+      .call(function(selection) {
+        // create y-tick element
+        var g = selection.append("g");
+
+        g.attr("class", function(d){return d.type ? "tick " + d.type : "tick"});
+
+        g.append("line")
+          .attr("x1", function(d){return d.type ? 0 : _config.yAxis.width})
+          .attr("x2", _config.width);
+        g.append("text")
+          .attr("x", function(d){return d.type ? 8 : _config.yAxis.width - 8 })
+          .attr("dy", function(d){return d.type ? "1em" : "0.4em"})
+          .text(function(d){return d.label});
+      });
+
+    // Setup chart Path
+    _plotPane.selectAll("path")
+      .data(_data)
+      .enter()
+      .append("path");
 
     _updateDisplay();
   }
 
   // チャートの前後に予備データ追加（塗りつぶしの始点をY=0に合わせるため
-  function _padData(data) {
+  function _padData(laneData) {
+    var data = laneData.data;
     data.unshift({t:d3.min(data, function(d){return d.t}), v:0});
     data.push({t:d3.max(data, function(d){return d.t}), v:0});
   }
 
   // 複数のチャートを縦に並べるため、チャート毎にY軸の値をOffsetする
-  function _offsetData(data, offset) {
-    data.forEach(function(v, i, a){v.v += offset});
+  function _offsetData(laneData) {
+    laneData.data.forEach(function(d, i, a){d.v += laneData.yOffset});
+    laneData.yLabels.forEach(function(d, i, a){d.v += laneData.yOffset});
   }
 
   function _updateDisplay() {
@@ -149,7 +274,7 @@ var TimingChart = (function(d3) {
     _plotPane.select("#test")
       .attr("cx", _xScale(10))
       .attr("cy", _yScale(3))
-      .attr("r", _config.zoom.x * 40);
+      .attr("r", _config.zoom.x * _yUnit);
     _plotPane.select("#test2")
       .attr("x", _xScale(12))
       .attr("y", _yScale(5));
@@ -158,7 +283,7 @@ var TimingChart = (function(d3) {
       .attr("transform", function(d) {return "translate(" + _xScale(d) + ", 0)"});
 
     _yAxis.selectAll("g")
-      .attr("transform", function(d) {return "translate(0, " + _yScale(d) + ")"});
+      .attr("transform", function(d) {return "translate(0, " + _yScale(d.v) + ")"});
     //###############
 
     _drawChart();
@@ -174,8 +299,9 @@ var TimingChart = (function(d3) {
 
     _yScale
       .range([
-        (_config.offset.y + _config.plotPane.height) * _config.zoom.y,
-        _config.offset.y * _config.zoom.y
+        //(_config.offset.y + _config.plotPane.height) * _config.zoom.y,
+        (_config.offset.y - _data.yRange[0]) * _config.zoom.y * _yUnit,
+        _config.offset.y * _config.zoom.y * _yUnit
       ]);
   }
 
@@ -215,7 +341,7 @@ var TimingChart = (function(d3) {
 
   function dragged(d) {
     _config.offset.x += d3.event.dx / _config.zoom.x;
-    _config.offset.y += d3.event.dy / _config.zoom.y;
+    _config.offset.y += d3.event.dy / _config.zoom.y / _yUnit;
     _updateDisplay();
   }
 
@@ -223,8 +349,10 @@ var TimingChart = (function(d3) {
     _plotPane.select("rect").classed("dragged", false);
   }
 
+  // ######### Utility method ########
 
-  // export public method
+
+  // ######## export public method ########
   return {
     config: _config,
     init: _init,
