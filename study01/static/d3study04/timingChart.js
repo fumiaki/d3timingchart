@@ -2,7 +2,7 @@
 
 var TimingChart = (function(d3) {
   var _config = {};
-  var _svg, _xAxis, _yAxis, _plotPane;
+  var _svg, _xAxis, _yAxis, _plotPane, _backPane;
 
   var _xScale = d3.scaleLinear();
   var _yScale = d3.scaleLinear();
@@ -60,6 +60,7 @@ var TimingChart = (function(d3) {
     _xAxis = _svg.select("#xAxis");
     _yAxis = _svg.select("#yAxis");
     _plotPane = _svg.select("#plotPane");
+    _backPane = _svg.select("#backPane")
 
     // create clipPath
     var defs = _svg.append("defs");
@@ -86,9 +87,6 @@ var TimingChart = (function(d3) {
     _xAxis
       .attr("transform", "translate(" + _config.xAxis.x + "," + _config.xAxis.y + ")")
       .attr('clip-path', 'url(#xAxis-clip)');
-    _xAxis.select(".background")
-      .attr("width", _config.xAxis.width)
-      .attr("height", _config.xAxis.height);
     _xAxis.selectAll(".tick line")
       .attr("y1", _config.xAxis.height)
       .attr("y2", _config.height);
@@ -96,17 +94,21 @@ var TimingChart = (function(d3) {
     _yAxis
       .attr("transform", "translate(" + _config.yAxis.x + "," + _config.yAxis.y + ")")
       .attr('clip-path', 'url(#yAxis-clip)');
-    _yAxis.select(".background")
-      .attr("width", _config.yAxis.width)
-      .attr("height", _config.yAxis.height);
     _yAxis.selectAll(".tick line")
       .attr("x2", _config.width);
 
-    _svg.select("#plotBackPane")
+    _backPane.select(".chart")
       .attr("transform", "translate(" + _config.plotPane.x + "," + _config.plotPane.y + ")")
-      .select(".background")
       .attr("width", _config.plotPane.width)
       .attr("height", _config.plotPane.height);
+    _backPane.select(".x")
+      .attr("transform", "translate(" + _config.xAxis.x + "," + _config.xAxis.y + ")")
+      .attr("width", _config.xAxis.width)
+      .attr("height", _config.xAxis.height);
+    _backPane.select(".y")
+      .attr("transform", "translate(" + _config.yAxis.x + "," + _config.yAxis.y + ")")
+      .attr("width", _config.yAxis.width)
+      .attr("height", _config.yAxis.height);
 
     _plotPane
       .attr("transform", "translate(" + _config.plotPane.x + "," + _config.plotPane.y + ")")
@@ -268,6 +270,7 @@ var TimingChart = (function(d3) {
   }
 
   function _updateDisplay() {
+    _scroll();
     _setScale();
 
     //#### TEST ######
@@ -299,9 +302,8 @@ var TimingChart = (function(d3) {
 
     _yScale
       .range([
-        //(_config.offset.y + _config.plotPane.height) * _config.zoom.y,
-        (_config.offset.y - _data.yRange[0]) * _config.zoom.y * _yUnit,
-        _config.offset.y * _config.zoom.y * _yUnit
+        (-_data.yRange[0]) * _config.zoom.y * _yUnit,
+        0
       ]);
   }
 
@@ -336,17 +338,36 @@ var TimingChart = (function(d3) {
 
   //var _dragStart = {x:0, y:0};
   function dragStarted(d) {
-    _plotPane.select("rect").classed("dragged", true);
+    _svg.select("#plotBackPane rect").classed("dragged", true);
   };
 
   function dragged(d) {
-    _config.offset.x += d3.event.dx / _config.zoom.x;
-    _config.offset.y += d3.event.dy / _config.zoom.y / _yUnit;
-    _updateDisplay();
+    _config.offset.x += d3.event.dx;
+    _config.offset.y += d3.event.dy;
+
+      _scroll();
   }
 
   function dragEnded(d) {
-    _plotPane.select("rect").classed("dragged", false);
+    _svg.select("#plotBackPane rect").classed("dragged", false);
+  }
+
+  function _scroll() {
+    _plotPane
+      .attr("transform", "translate(" + (_config.plotPane.x + _config.offset.x) + "," + (_config.plotPane.y + _config.offset.y) + ")");
+    _svg.select("#chart-clip rect")
+      .attr("x", -_config.offset.x)
+      .attr("y", -_config.offset.y);
+
+    _xAxis
+      .attr("transform", "translate(" + (_config.xAxis.x + _config.offset.x) + ", 0)");
+    _svg.select("#xAxis-clip rect")
+      .attr("x", -_config.offset.x);
+
+    _yAxis
+      .attr("transform", "translate(0, " + (_config.yAxis.y + _config.offset.y) + ")");
+    _svg.select("#yAxis-clip rect")
+      .attr("y", -_config.offset.y);
   }
 
   // ######### Utility method ########

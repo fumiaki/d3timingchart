@@ -14,44 +14,16 @@
     <svg id="chart" width="320" height="240" style="position: absolute; left: 0px; top: 0px">
       <g transform="translate(0, 0)">
 
-        <g id="plotBackPane" class="plotBackPane" transform="translate(100, 100)">
-          <rect class="background" width="100" height="40"/>
+        <g id="backPane" class="background">
+          <rect class="chart" width="100" height="40"/>
+          <rect class="x axis" width="100" height="40"/>
+          <rect class="y axis" width="100" height="40"/>
         </g>
 
         <g id="xAxis" class="x axis" transform="translate(0,0)">
-          <rect class="background" width="100" height="40"/>
-          <!--
-          <g class="tick" transform="translate(100, 0)">
-            <line y2="100"></line>
-            <text y="50">ABCDE</text>
-          </g>
-          <g class="tick" transform="translate(200, 0)">
-            <line y2="100"></line>
-            <text y="50">12345</text>
-          </g>
-          <g class="tick" transform="translate(300, 0)">
-            <line y2="100"></line>
-            <text y="50">あいうえお</text>
-          </g>
-        -->
         </g>
 
         <g id="yAxis" class="y axis" transform="translate(0,100)">
-          <rect class="background" width="100" height="40"/>
-          <!--
-          <g class="tick" transform="translate(0, 100)">
-            <line x2="100"></line>
-            <text x="100">ABCDE</text>
-          </g>
-          <g class="tick" transform="translate(0, 200)">
-            <line x2="100"></line>
-            <text x="100">12345</text>
-          </g>
-          <g class="tick" transform="translate(0, 300)">
-            <line x2="100"></line>
-            <text x="100">あいうえお</text>
-          </g>
-        -->
         </g>
 
         <g id="plotPane" class="chart" transform="translate(100, 100)">
@@ -71,258 +43,14 @@
         <button type="button" onClick="TimingChart.resetDisplay()">reset</button>
       </form>
     </div>
+
     <script>
-    var sampleData =
-    [
-      {
-        id: "1",
-        name: "ROBOT 1",
-        //color: "rgb(146,208,80)",
-        color: "#ff9800",
-        data: [
-          {t:0, v:3},
-          {t:2, v:4},
-          {t:2.5, v:4},
-          {t:5.5, v:1},
-          {t:6, v:1},
-          {t:8, v:2},
-          {t:9, v:2},
-          {t:10, v:3},
-          {t:13, v:3}
-        ],
-        yLabels: [
-          {v:0, label: "原点"},
-          {v:1, label: "コアストッカーA位置"},
-          {v:2, label: "コアストッカーB位置"},
-          {v:3, label: "内径溶接待機位置"},
-          {v:4, label: "内径セット位置"}
-        ]
-      },
-      {
-        id: "2",
-        name: "ROBOT 1.HAND",
-        //color: "rgb(146,208,80)",
-        color: "#ff9800",
-        data: [
-          {t:0, v:1},
-          {t:2, v:1},
-          {t:2.5, v:0},
-          {t:5.5, v:0},
-          {t:6, v:1},
-          {t:8, v:1},
-          {t:8.5, v:0},
-          {t:9, v:1},
-          {t:13, v:1}
-        ],
-        yLabels: [
-          {v:0, label: "アンクランプ"},
-          {v:1, label: "クランプ"}
-        ]
-      },
-      {
-        id: "3",
-        name: "ROBOT 2",
-        //color: "#ffc000",
-        color: "#ffc107",
-        data: [
-          {t:0, v:3},
-          {t:2, v:3},
-          {t:3.9, v:4},
-          {t:4.4, v:4},
-          {t:7.4, v:1},
-          {t:7.5, v:1},
-          {t:9.5, v:2},
-          {t:10, v:2},
-          {t:11, v:3},
-          {t:13, v:3}
-        ],
-        yLabels: [
-          {v:0, label: "原点"},
-          {v:1, label: "内径溶接待機位置"},
-          {v:2, label: "内径取り出し位置"},
-          {v:3, label: "外径溶接待機位置"},
-          {v:4, label: "外径セット位置"}
-        ]
-      },
-      {
-        id: "4",
-        name: "ROBOT 2.HAND",
-        //color: "rgb(146,208,80)",
-        color: "#ffc107",
-        data: [
-          {t:0, v:1},
-          {t:3.9, v:1},
-          {t:4.4, v:0},
-          {t:9.5, v:0},
-          {t:10, v:1},
-          {t:13, v:1}
-        ],
-        yLabels: [
-          {v:0, label: "アンクランプ"},
-          {v:1, label: "クランプ"}
-        ]
-      },
-      {
-        id: "5",
-        name: "内径溶接機 スピンドル 上下",
-        color: "#3f51b5",
-        data: [
-          {t:0, v:1},
-          {t:2.5, v:1},
-          {t:3.7, v:0},
-          {t:7.1, v:0},
-          {t:7.5, v:1},
-          {t:13, v:1}
-        ],
-        yLabels: [
-          {v:0, label: "下降"},
-          {v:1, label: "上昇"}
-        ]
-      },
-      {
-        id: "6",
-        name: "内径溶接機 スピンドル 回転",
-        color: "#3f51b5",
-        data: [
-          {t:0, v:0},
-          {t:3.7, v:0},
-          {t:3.7, v:1},
-          {t:7.1, v:1},
-          {t:7.1, v:0},
-          {t:13, v:0}
-        ],
-        yLabels: [
-          {v:0, label: "停止"},
-          {v:1, label: "回転"}
-        ]
-      },
-      {
-        id: "7",
-        name: "外径溶接機 上部治具 開閉",
-        color: "#2196f3",
-        data: [
-          {t:0, v:0},
-          {t:5.5, v:0},
-          {t:5.8, v:1},
-          {t:6.3, v:1},
-          {t:6.6, v:0},
-          {t:13, v:0}
-        ],
-        yLabels: [
-          {v:0, label: "閉"},
-          {v:1, label: "開"}
-        ]
-      },
-      {
-        id: "8",
-        name: "外径溶接機 上部治具 上下",
-        color: "#2196f3",
-        data: [
-          {t:0, v:0},
-          {t:1.3, v:0},
-          {t:1.9, v:1},
-          {t:4.7, v:1},
-          {t:5.5, v:.5},
-          {t:5.8, v:.5},
-          {t:6.3, v:0},
-          {t:13, v:0}
-        ],
-        yLabels: [
-          {v:0, label: "下降"},
-          {v:.5, label: "中間"},
-          {v:1, label: "上昇"}
-        ]
-      },
-      {
-        id: "9",
-        name: "外径溶接機 上部治具 加圧",
-        color: "#2196f3",
-        data: [
-          {t:0, v:1},
-          {t:0.8, v:1},
-          {t:1, v:0},
-          {t:6.4, v:0},
-          {t:6.9, v:1},
-          {t:13, v:1}
-        ],
-        yLabels: [
-          {v:0, label: "加圧"},
-          {v:1, label: "解除"}
-        ]
-      },
-      {
-        id: "10",
-        name: "外径溶接機 下部治具 開閉",
-        color: "#2196f3",
-        data: [
-          {t:0, v:0},
-          {t:1, v:0},
-          {t:1.3, v:1},
-          {t:4.4, v:1},
-          {t:4.7, v:0},
-          {t:13, v:0}
-        ],
-        yLabels: [
-          {v:0, label: "閉"},
-          {v:1, label: "開"}
-        ]
-      },
-      {
-        id: "10",
-        name: "外径溶接機 下部治具 上下",
-        color: "#2196f3",
-        data: [
-          {t:0, v:0},
-          {t:1.3, v:0},
-          {t:1.7, v:1},
-          {t:4.7, v:1},
-          {t:5.2, v:0},
-          {t:13, v:0}
-        ],
-        yLabels: [
-          {v:0, label: "下降"},
-          {v:1, label: "上昇"}
-        ]
-      },
-      {
-        id: "11",
-        name: "外径溶接機 フタ",
-        color: "#2196f3",
-        data: [
-          {t:0, v:0},
-          {t:0.8, v:0},
-          {t:1.2, v:1},
-          {t:6.6, v:1},
-          {t:7.1, v:0},
-          {t:13, v:0}
-        ],
-        yLabels: [
-          {v:0, label: "閉"},
-          {v:1, label: "開"}
-        ]
-      },
-      {
-        id: "12",
-        name: "外径溶接機 スピンドル",
-        color: "#2196f3",
-        data: [
-          {t:0, v:1},
-          {t:0.8, v:1},
-          {t:0.8, v:0},
-          {t:7.1, v:0},
-          {t:7.1, v:1},
-          {t:13, v:1}
-        ],
-        yLabels: [
-          {v:0, label: "停止"},
-          {v:1, label: "回転"}
-        ]
-      }
-    ];
-
-    TimingChart.init({width: 1200, height: 800});
-    TimingChart.setData(sampleData);
-
+    d3.json("./sampleData.json", function(err, json) {
+      console.log("json loaded!");
+      TimingChart.init({});
+      TimingChart.setData(json);
+    });
     </script>
+
   </body>
 </html>
