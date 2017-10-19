@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>STUDY01</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="timingChart.css">
+    <script src="/lib/d3/d3.min.js"></script>
+
+  </head>
+  <body>
+
+    <svg id="chart" width="100%" height="100%" style="position: absolute; left: 0px; top: 0px">
+      <g transform="translate(0, 0)">
+
+        <g id="backPane" class="background">
+          <rect class="chart" width="480" height="400" x="160" y="80"/>
+          <rect class="x axis" width="480" height="80" x="160"/>
+          <rect class="y axis" width="160" height="400" y="80"/>
+        </g>
+
+        <g id="xAxis" class="x axis" transform="translate(160,0)">
+        </g>
+
+        <g id="yAxis" class="y axis" transform="translate(0,80)">
+        </g>
+
+        <g id="plotPane" class="chart" transform="translate(160, 80)">
+          <path d="M0,100 L100,100 L150,50 L250,50 L300,100"></path>
+          <path id="e01" d="M100,200 L150,150"></path>
+          <path id="e02" d="M250,250 L300,300"></path>
+        </g>
+      </g>
+    </svg>
+
+    <div  style="position: absolute; left: 0px; top: 0px">
+      <h2>Timing Chart</h2>
+      <p id="console1"></p>
+      <p id="console2"></p>
+      <p id="console3"></p>
+    </div>
+
+    <script>
+    var sampleData = [
+      {
+        id:"e01",
+        name:"Event 1",
+        from: 0,
+        to: 1,
+        duration:50,
+        y: 100,
+        x: 100
+      },
+      {
+        id:"e02",
+        name:"Event 2",
+        from: 1,
+        to: 0,
+        duration:50,
+        y: 200,
+        x: 150
+      },
+      {
+        id:"e03",
+        name:"Event 3",
+        from: 1,
+        to: 0,
+        duration:100,
+        y: 300,
+        x: 250
+      },
+      {
+        id:"e04",
+        name:"Event 4",
+        from: 0,
+        to: 1,
+        duration:25,
+        y: 200,
+        x: 350
+      }
+    ]
+
+    d3.select("#plotPane").selectAll(".event")
+      .data(sampleData)
+      .enter()
+      .call(createEventNode);
+
+
+    function createEventNode(selection) {
+      selection
+        .append("g")
+        .classed("event", true)
+        .on("mouseover", function(d) {
+          d3.select(this).classed("hover", true)
+        })
+        .on("mouseout", function(d) {
+          d3.select(this).classed("hover", false)
+        })
+        .call(d3.drag()
+          .on("start", function(d) {
+            d3.select(this).classed("dragged", true);
+          })
+          .on("drag", function(d) {
+            d.x += d3.event.dx;
+            d3.select(this).call(updateEventNode)
+            d3.select("#console1").text(JSON.stringify(d));
+            d3.select("#console2").text(JSON.stringify(d3.event));
+            d3.select("#console3").text(d3.mouse(this));
+          })
+          .on("end", function(d) {
+            d3.select(this).classed("dragged", false);
+          })
+        )
+        .call(createEventVisual)
+        .call(updateEventNode);
+    };
+
+    function createEventVisual(s) {
+      s.append("rect");
+      s.append("path");
+      var pathString = d3.line()
+        .x(function(d) {return _xScale(d.t)})
+        .y(function(d) {return _yScale(d.v)});
+
+    };
+
+    function updateEventNode(s) {
+      s.select("rect")
+        .attr("x", function(d){return d.x})
+        .attr("y", function(d){return d.y})
+        .attr("width", function(d){return d.duration})
+        .attr("height", function(d){return 50});
+      s.select("path")
+        .attr("d", function(d){
+          var pathString
+            = "M" + d.x + "," + (d.y + d.from*50)
+            + " l" + d.duration + "," + ((d.to - d.from)*50); 
+          return pathString;
+        })
+    };
+
+    </script>
+
+  </body>
+</html>

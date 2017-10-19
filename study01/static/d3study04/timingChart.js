@@ -154,7 +154,7 @@ var TimingChart = (function(d3) {
         _config.height = window.innerHeight;
 
         _setSVGElementSize();
-        _updateDisplay();
+        //_updateDisplay();
 
       });
   };
@@ -243,7 +243,7 @@ var TimingChart = (function(d3) {
           .attr("x2", _config.width);
         g.append("text")
           .attr("x", function(d){return d.type ? 8 : _config.yAxis.width - 8 })
-          .attr("dy", function(d){return d.type ? "1em" : "0.4em"})
+          .attr("dy", function(d){return d.type ? "1em" : "0.35em"})
           .text(function(d){return d.label});
       });
 
@@ -296,8 +296,8 @@ var TimingChart = (function(d3) {
   function _setScale() {
     _xScale
       .range([
-        _config.offset.x * _config.zoom.x,
-        (_config.offset.x + _config.plotPane.width) * _config.zoom.x
+        0,
+        _config.plotPane.width * _config.zoom.x
       ]);
 
     _yScale

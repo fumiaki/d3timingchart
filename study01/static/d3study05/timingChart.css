@@ -1,0 +1,165 @@
+/* HTML Style */
+body {
+  font-family: meiryo;
+  font-size: 16px;
+  color: #616161;
+
+}
+
+button {
+  background-color: #00BCD4
+}
+
+/* SVG Style */
+svg {
+  stroke: #616161;
+  width: 100%;
+}
+
+text {
+  stroke: none;
+  font-family: meiryo;
+  font-size: 1.25em;
+}
+
+.chart path {
+  stroke: #616161;
+  stroke-width: 4;
+  fill: #ffc000;
+  fill-opacity: 0.5;
+  /*marker-mid: url('#chartMarker');*/
+}
+
+.marker {
+  stroke-width: 1;
+  stroke: #616161;
+  fill: none;
+}
+
+.link {
+  stroke: #616161;
+  stroke-width: 2;
+  stroke-dasharray: 5;
+  fill: none;
+  marker-end: url('#linkArrow');
+}
+
+
+.tick line {
+  stroke: #9E9E9E;
+  stroke-width: 0.5;
+  stroke-dasharray: 4;
+  fill: none;
+}
+
+.tick text {
+  font-size: 0.8em;
+}
+
+.x .tick text {
+  text-anchor: start;
+}
+
+.y .tick text {
+  text-anchor: end;
+}
+
+.separator line {
+  stroke: #9E9E9E;
+  stroke-width: 0.5;
+  stroke-dasharray: none;
+  fill: none;
+}
+
+.separator text {
+  font-size: 1em;
+}
+
+.y .separator text {
+  text-anchor: start;
+}
+
+.background {
+  stroke: #9E9E9E;
+  stroke-width: 0.5;
+  fill: #EEEEEE;
+}
+
+.chart .event rect {
+  fill: #00bcd4;
+  stroke: none;
+  opacity: 0;
+}
+
+
+.chart .event.hover rect {
+  fill: #00bcd4;
+  opacity: 0.5;
+  stroke: #9c27b0;
+  stroke-width: 4;
+}
+
+.chart .event.dragged rect {
+  fill: #dddd80;
+  opacity: 0.5;
+  stroke: #f44336;
+  stroke-width: 8;
+}
+
+.Red_500 {
+  fill: #f44336;
+}
+.Pink_500 {
+  fill: #e91e63;
+}
+.Purple_500 {
+  fill: #9c27b0;
+}
+.DeepPurple_500 {
+  fill: #673ab7;
+}
+.Indigo_500 {
+  fill: #3f51b5;
+}
+.Blue_500 {
+  fill: #2196f3;
+}
+.LightBlue_500 {
+  fill: #03a9f4;
+}
+.Cyan_500 {
+  fill: #00bcd4;
+}
+.Teal_500 {
+  fill: #26a69a;
+}
+.Green_500 {
+  fill: #66bb6a;
+}
+.LightGreen_500 {
+  fill: #9ccc65;
+}
+.Lime_500 {
+  fill: #d4e157;
+}
+.Yellow_500 {
+  fill: #ffee58;
+}
+.Amber_500 {
+  fill: #ffc107;
+}
+.Orange_500 {
+  fill: #ff9800;
+}
+.DeepOrange_500 {
+  fill: #ff5722;
+}
+.Brown_500 {
+  fill: #795548;
+}
+.Grey_500 {
+  fill: #9e9e9e;
+}
+.BlueGrey_500 {
+  fill: #607d8b;
+}
