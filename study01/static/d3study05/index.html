@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="timingChart.css">
     <script src="/lib/d3/d3.min.js"></script>
+    <script src="ChartModel.js"></script>
 
   </head>
   <body>
@@ -43,47 +44,54 @@
     <script>
     var sampleData = [
       {
-        id:"e01",
+        //id:"e01",
         name:"Event 1",
-        from: 0,
-        to: 1,
-        duration:50,
-        y: 100,
-        x: 100
+        from: 0, to: 1, duration:50,
+        y: 100, x: 100
       },
       {
         id:"e02",
         name:"Event 2",
-        from: 1,
-        to: 0,
-        duration:50,
-        y: 200,
-        x: 150
+        from: 0, to: 2, duration:50,
+        y: 200, x: 150
       },
       {
         id:"e03",
         name:"Event 3",
-        from: 1,
-        to: 0,
-        duration:100,
-        y: 300,
-        x: 250
+        from: 1, to: 0, duration:100,
+        y: 300, x: 250
       },
       {
         id:"e04",
         name:"Event 4",
-        from: 0,
-        to: 1,
-        duration:25,
-        y: 200,
-        x: 350
+        from: 0, to: 1, duration:25,
+        y: 200, x: 350
+      },
+      {
+        name:"Event 5"
+      },
+      {
+        id:"e06",
+        name:"Event 6",
+        from: 0, to: 1, duration:1,
+        y: 400, x: 200
       }
-    ]
+    ];
 
+    var chart = ChartFactory.createChart();
+    var sampleNodes = chart.createNodes(sampleData);
+    console.log(chart);
+
+    // Main
     d3.select("#plotPane").selectAll(".event")
-      .data(sampleData)
+      .data(sampleNodes)
       .enter()
       .call(createEventNode);
+
+    d3.select("#plotPane").selectAll(".link")
+      .data(sampleLinks)
+      .enter()
+      .call(createLinkNode);
 
 
     function createEventNode(selection) {
@@ -104,7 +112,7 @@
             d.x += d3.event.dx;
             d3.select(this).call(updateEventNode)
             d3.select("#console1").text(JSON.stringify(d));
-            d3.select("#console2").text(JSON.stringify(d3.event));
+            //d3.select("#console2").text(JSON.stringify(d3.event));
             d3.select("#console3").text(d3.mouse(this));
           })
           .on("end", function(d) {
@@ -118,10 +126,6 @@
     function createEventVisual(s) {
       s.append("rect");
       s.append("path");
-      var pathString = d3.line()
-        .x(function(d) {return _xScale(d.t)})
-        .y(function(d) {return _yScale(d.v)});
-
     };
 
     function updateEventNode(s) {
@@ -129,12 +133,12 @@
         .attr("x", function(d){return d.x})
         .attr("y", function(d){return d.y})
         .attr("width", function(d){return d.duration})
-        .attr("height", function(d){return 50});
+        .attr("height", function(d){return Math.abs(d.to - d.from)*50});
       s.select("path")
         .attr("d", function(d){
           var pathString
             = "M" + d.x + "," + (d.y + d.from*50)
-            + " l" + d.duration + "," + ((d.to - d.from)*50); 
+            + " l" + d.duration + "," + ((d.to - d.from)*50);
           return pathString;
         })
     };
