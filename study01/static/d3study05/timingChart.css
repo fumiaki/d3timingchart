@@ -99,7 +99,7 @@ text {
   stroke-width: 4;
 }
 
-.chart .event.dragged rect {
+.chart .event rect.dragged {
   fill: #dddd80;
   opacity: 0.5;
   stroke: #f44336;

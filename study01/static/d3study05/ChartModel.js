@@ -68,8 +68,7 @@ class Node {
       from: 0,
       to: 1,
       duration:50,
-      y: 100,
-      x: 0
+      y: 100, x: 0
     };
     // Marge paramObject to default object
     Object.assign(this, defaultValue);

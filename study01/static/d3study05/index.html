@@ -42,44 +42,59 @@
     </div>
 
     <script>
-    var sampleData = [
-      {
-        //id:"e01",
-        name:"Event 1",
-        from: 0, to: 1, duration:50,
-        y: 100, x: 100
-      },
-      {
-        id:"e02",
-        name:"Event 2",
-        from: 0, to: 2, duration:50,
-        y: 200, x: 150
-      },
-      {
-        id:"e03",
-        name:"Event 3",
-        from: 1, to: 0, duration:100,
-        y: 300, x: 250
-      },
-      {
-        id:"e04",
-        name:"Event 4",
-        from: 0, to: 1, duration:25,
-        y: 200, x: 350
-      },
-      {
-        name:"Event 5"
-      },
-      {
-        id:"e06",
-        name:"Event 6",
-        from: 0, to: 1, duration:1,
-        y: 400, x: 200
-      }
-    ];
+    var sampleData = {
+      nodes: [
+        {
+          //id:"e01",
+          name:"Event 1",
+          from: 0, to: 1, duration:50,
+          y: 100, x: 100
+        },
+        {
+          id:"e02",
+          name:"Event 2",
+          from: 0, to: 2, duration:50,
+          y: 200, x: 150
+        },
+        {
+          id:"e03",
+          name:"Event 3",
+          from: 1, to: 0, duration:100,
+          y: 300, x: 250
+        },
+        {
+          id:"e04",
+          name:"Event 4",
+          from: 0, to: 1, duration:25,
+          y: 200, x: 350
+        },
+        {
+          name:"Event 5"
+        },
+        {
+          id:"e06",
+          name:"Event 6",
+          from: 0, to: 1, duration:0,
+          y: 400, x: 200
+        }
+      ],
+      links: [
+        {
+          name: "Link 1",
+          from: "e02",
+          to: "e03"
+        },
+        {
+          name: "Link 2",
+          from: "e06",
+          to: "e04"
+        }
+      ]
+    };
 
     var chart = ChartFactory.createChart();
-    var sampleNodes = chart.createNodes(sampleData);
+    var sampleNodes = chart.createNodes(sampleData.nodes);
+    var sampleLinks = chart.createLinks(sampleData.links);
     console.log(chart);
 
     // Main
@@ -104,13 +119,20 @@
         .on("mouseout", function(d) {
           d3.select(this).classed("hover", false)
         })
+        .call(createEventVisual)
+        .call(updateEventNode);
+    };
+
+    function createEventVisual(s) {
+      s.append("rect")
+        .classed("bodyHandle", true)
         .call(d3.drag()
           .on("start", function(d) {
             d3.select(this).classed("dragged", true);
           })
           .on("drag", function(d) {
             d.x += d3.event.dx;
-            d3.select(this).call(updateEventNode)
+            d3.select(this.parentNode).call(updateEventNode)
             d3.select("#console1").text(JSON.stringify(d));
             //d3.select("#console2").text(JSON.stringify(d3.event));
             d3.select("#console3").text(d3.mouse(this));
@@ -118,22 +140,39 @@
           .on("end", function(d) {
             d3.select(this).classed("dragged", false);
           })
-        )
-        .call(createEventVisual)
-        .call(updateEventNode);
-    };
-
-    function createEventVisual(s) {
-      s.append("rect");
-      s.append("path");
+        );
+      s.append("rect")
+        .classed("resizeHandle", true)
+        .call(d3.drag()
+          .on("start", function(d) {
+            d3.select(this).classed("dragged", true);
+          })
+          .on("drag", function(d) {
+            d.duration = Math.max(d.duration + d3.event.dx, 0);
+            d3.select(this.parentNode).call(updateEventNode)
+            d3.select("#console1").text(JSON.stringify(d));
+            //d3.select("#console2").text(JSON.stringify(d3.event));
+            d3.select("#console3").text(d3.mouse(this));
+          })
+          .on("end", function(d) {
+            d3.select(this).classed("dragged", false);
+          })
+        );
+;
+      s.append("path").classed("vis", true);
     };
 
     function updateEventNode(s) {
-      s.select("rect")
-        .attr("x", function(d){return d.x})
-        .attr("y", function(d){return d.y})
-        .attr("width", function(d){return d.duration})
-        .attr("height", function(d){return Math.abs(d.to - d.from)*50});
+      s.select("rect.bodyHandle")
+        .attr("x", function(d){return d.x - 4})
+        .attr("y", function(d){return d.y - 4})
+        .attr("width", function(d){return d.duration + 8})
+        .attr("height", function(d){return Math.abs(d.to - d.from)*50 + 8});
+        s.select("rect.resizeHandle")
+          .attr("x", function(d){return d.x + d.duration + 4})
+          .attr("y", function(d){return d.y - 4})
+          .attr("width", function(d){return 16})
+          .attr("height", function(d){return Math.abs(d.to - d.from)*50 + 8});
       s.select("path")
         .attr("d", function(d){
           var pathString
