@@ -1,0 +1,131 @@
+{
+  "lanes": [
+    {
+      "id": "lane01",
+      "name": "ROBOT 1",
+      "color": "#ff9800",
+      "yOffset": 100,
+      "stateLabels": [
+        {"v":0, "label": "原点"},
+        {"v":1, "label": "コアストッカーA位置"},
+        {"v":2, "label": "コアストッカーB位置"},
+        {"v":3, "label": "内径溶接待機位置"},
+        {"v":4, "label": "内径セット位置"}
+      ]
+    },
+    {
+      "id": "lane02",
+      "name": "ROBOT 1.HAND",
+      "color": "#ff9800",
+      "yOffset": 200,
+      "stateLabels": [
+        {"v":0, "label": "アンクランプ"},
+        {"v":1, "label": "クランプ"}
+      ]
+    },
+    {
+      "id": "lane03",
+      "name": "ROBOT 2",
+      "color": "#ffc107",
+      "yOffset": 400,
+      "stateLabels": [
+        {"v":0, "label": "原点"},
+        {"v":1, "label": "内径溶接待機位置"},
+        {"v":2, "label": "内径取り出し位置"},
+        {"v":3, "label": "外径溶接待機位置"},
+        {"v":4, "label": "外径セット位置"}
+      ]
+    },
+    {
+      "id": "lane04",
+      "name": "ROBOT 2.HAND",
+      "color": "#ffc107",
+      "stateLabels": [
+        {"v":0, "label": "アンクランプ"},
+        {"v":1, "label": "クランプ"}
+      ]
+    }
+  ],
+
+  "nodes": [
+    {
+      "id":"e01",
+      "name":"Event 1",
+      "lane": "lane01",
+      "_initialState": 0, "endState": 1, "duration":50,
+      "y": 100, "x": 0
+    },
+    {
+      "id":"e02",
+      "name":"Event 2",
+      "lane": "lane01",
+      "_initialState": 1, "endState": 0, "duration":50,
+      "y": 100, "x": 200
+    },
+    {
+      "id":"e03",
+      "name":"Event 3",
+      "lane": "lane02",
+      "_initialState": 0, "endState": 1, "duration":100,
+      "y": 200, "x": 50
+    },
+    {
+      "id":"e04",
+      "name":"Event 4",
+      "lane": "lane02",
+      "_initialState": 1, "endState": 0, "duration":25,
+      "y": 200, "x": 250
+    },
+    {
+      "id":"e07",
+      "name":"Event 6",
+      "lane": "lane03",
+      "_initialState": 2, "endState": 0, "duration":0,
+      "y": 400, "x": 300
+    },
+    {
+      "id":"e06",
+      "name":"Event 6",
+      "lane": "lane03",
+      "_initialState": 1, "endState": 2, "duration":50,
+      "y": 400, "x": 200
+    },
+    {
+      "id":"e05",
+      "name":"Event 5",
+      "lane": "lane03",
+      "_initialState": 0, "endState": 1, "duration":50,
+      "y": 400, "x": 0
+    },
+    {
+      "id":"e08",
+      "name":"Event 8",
+      "lane": "lane03",
+      "_initialState": 0, "endState": 1, "duration":0,
+      "y": 400, "x": 350
+    }
+  ],
+
+  "links": [
+    {
+      "name": "Link 1",
+      "from": "e01",
+      "to": "e03"
+    },
+    {
+      "name": "Link 2",
+      "from": "e02",
+      "to": "e04"
+    },
+    {
+      "name": "Link 3",
+      "from": "e05",
+      "to": "e03"
+    },
+    {
+      "name": "Link 4",
+      "from": "e04",
+      "to": "e07"
+    }
+  ]
+}

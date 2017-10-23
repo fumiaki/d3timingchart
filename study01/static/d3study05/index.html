@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="timingChart.css">
     <script src="/lib/d3/d3.min.js"></script>
     <script src="ChartModel.js"></script>
+    <script src="ChartView.js"></script>
 
   </head>
   <body>
@@ -24,9 +25,9 @@
       <g transform="translate(0, 0)">
 
         <g id="backPane" class="background">
-          <rect class="chart" width="480" height="400" x="160" y="80"/>
-          <rect class="x axis" width="480" height="80" x="160"/>
-          <rect class="y axis" width="160" height="400" y="80"/>
+          <rect class="chart" width="480" height="400"/>
+          <rect class="x axis" width="480" height="80"/>
+          <rect class="y axis" width="160" height="400"/>
         </g>
 
         <g id="xAxis" class="x axis" transform="translate(160,0)">
@@ -46,305 +47,22 @@
 
     <div  style="position: absolute; left: 0px; bottom: 0px">
       <h2>Timing Chart</h2>
-      <button type="button" onClick="changeEditMode('move')">Move</button>
-      <button type="button" onClick="changeEditMode('link')">Link</button>
+      <button type="button" onClick="ChartView.changeEditMode('move')">Move</button>
+      <button type="button" onClick="ChartView.changeEditMode('link')">Link</button>
       <p id="console1"></p>
       <p id="console2"></p>
       <p id="console3"></p>
     </div>
 
     <script>
-    var sampleData = {
-      nodes: [
-        {
-          id:"e01",
-          name:"Event 1",
-          _initialState: 0, endState: 1, duration:50,
-          y: 100, x: 0
-        },
-        {
-          id:"e02",
-          name:"Event 2",
-          _initialState: 1, endState: 0, duration:50,
-          y: 100, x: 200
-        },
-        {
-          id:"e03",
-          name:"Event 3",
-          _initialState: 0, endState: 1, duration:100,
-          y: 200, x: 50
-        },
-        {
-          id:"e04",
-          name:"Event 4",
-          _initialState: 1, endState: 0, duration:25,
-          y: 200, x: 250
-        },
-        {
-          id:"e07",
-          name:"Event 6",
-          _initialState: 2, endState: 0, duration:0,
-          y: 400, x: 300
-        },
-        {
-          id:"e06",
-          name:"Event 6",
-          _initialState: 1, endState: 2, duration:50,
-          y: 400, x: 200
-        },
-        {
-          id:"e05",
-          name:"Event 5",
-          _initialState: 0, endState: 1, duration:50,
-          y: 400, x: 0
-        },
-        {
-          id:"e08",
-          name:"Event 8",
-          _initialState: 0, endState: 1, duration:0,
-          y: 400, x: 350
-        },
-      ],
-      links: [
-        {
-          name: "Link 1",
-          from: "e01",
-          to: "e03"
-        },
-        {
-          name: "Link 2",
-          from: "e02",
-          to: "e04"
-        },
-        {
-          name: "Link 3",
-          from: "e05",
-          to: "e03"
-        },
-        {
-          name: "Link 4",
-          from: "e04",
-          to: "e07"
-        }
-      ]
-    };
+    d3.json("./sampleData.json", function(err, json) {
+      console.log("json loaded!");
 
-    var chart = ChartFactory.createChart(sampleData);
-    //var sampleNodes = chart.createNodes(sampleData.nodes);
-    //var sampleLinks = chart.createLinks(sampleData.links);
-    console.log(chart);
-    console.log(chart.getLanes());
+      var chart = ChartFactory.createChart(json);
 
-    // Main
-    d3.select("#plotPane").selectAll(".lane")
-      .data(chart.getLanes())
-      .enter()
-      .call(createLaneNode);
-
-    d3.select("#plotPane").selectAll(".event")
-      .data(Array.from(chart.nodes.values()))
-      .enter()
-      .call(createEventNode);
-
-    d3.select("#plotPane").selectAll(".link")
-      .data(Array.from(chart.links.values()))
-      .enter()
-      .call(createLinkNode);
-
-    //var editMode = "move";
-    var editMode = "link";
-
-
-
-    function createLaneNode(selection) {
-      selection
-        .append("g")
-        .classed("lane", true)
-        .attr("id", function(d) {return d.id})
-        .call(createLaneVisual)
-        .call(updateLaneNode);
-    };
-
-    function createLaneVisual(s) {
-      s.append("path")
-        .classed("vis", true)
-        ;
-    };
-    function updateLaneNode(s) {
-      s.select("path")
-        .attr("d", function(d0) {
-          var pathStr = "M0," + d0.y;
-          d0.data.forEach(function(d,i,a) {
-            //console.log(d)
-            pathStr
-              += " L" + d.x + "," + (d.y + d._initialState*-50)
-              + " l" + d.duration + "," + ((d.endState - d._initialState)*-50);
-          });
-          pathStr += " H400";
-          console.log(pathStr);
-          return pathStr;
-        });
-    };
-
-    function createEventNode(selection) {
-      selection
-        .append("g")
-        .attr("id", function(d) {return d.id})
-        .classed("event", true)
-        .on("mouseover", function(d) {
-          d3.select(this).classed("hover", true)
-        })
-        .on("mouseout", function(d) {
-          d3.select(this).classed("hover", false)
-        })
-        .call(createEventVisual)
-        .call(updateEventNode);
-    };
-
-    function createEventVisual(s) {
-      //s.append("path").classed("vis", true);
-      s.append("rect")
-        .classed("bodyHandle", true)
-        .call(d3.drag()
-          .on("start", function(d) {
-            d3.select(this).classed("dragged", true);
-          })
-          .on("drag", function(d) {
-            if (editMode == "move") {
-              d.x += d3.event.dx;
-              d3.select(this.parentNode).call(updateEventNode)
-
-              d3.select("#plotPane").selectAll(".link")
-                .call(updateLinkNode);
-              d3.select("#plotPane").selectAll(".lane")
-                .call(updateLaneNode);
-
-            } else if(editMode == "link") {
-
-            }
-
-            d3.select("#console1").text(JSON.stringify(d));
-            //d3.select("#console2").text(JSON.stringify(d3.event));
-            d3.select("#console3").text(d3.mouse(this));
-          })
-          .on("end", function(d) {
-            d3.select(this).classed("dragged", false);
-
-            if(editMode == "link") {
-              var dropTo = d3.select("#plotPane").select(".event.hover");
-              var newLink = chart.createLink({
-                name: "New Link",
-                from: d3.select(this).datum().id,
-                to: dropTo.datum().id
-              });
-
-              d3.select("#plotPane").selectAll(".link")
-                .data(Array.from(chart.links.values()))
-                .enter()
-                .call(createLinkNode);
-            }
-
-          })
-        );
-      s.append("rect")
-        .classed("resizeHandle", true)
-        .call(d3.drag()
-          .on("start", function(d) {
-            d3.select(this).classed("dragged", true);
-          })
-          .on("drag", function(d) {
-            d.duration = Math.max(d.duration + d3.event.dx, 0);
-            d3.select(this.parentNode).call(updateEventNode)
-
-            d3.select("#plotPane").selectAll(".link")
-              .call(updateLinkNode);
-            d3.select("#plotPane").selectAll(".lane")
-              .call(updateLaneNode);
-
-            d3.select("#console1").text(JSON.stringify(d));
-            //d3.select("#console2").text(JSON.stringify(d3.event));
-            d3.select("#console3").text(d3.mouse(this));
-          })
-          .on("end", function(d) {
-            d3.select(this).classed("dragged", false);
-          })
-        );
-    };
-
-    function updateEventNode(s) {
-      /*
-      s.select("path")
-        .attr("d", function(d){
-          var pathString
-            = "M" + d.x + "," + (d.y + d._initialState*-50)
-            + " l" + d.duration + "," + ((d.endState - d._initialState)*-50);
-          return pathString;
-        })
-      */
-      s.select("rect.bodyHandle")
-        .attr("x", function(d){return d.x - 4})
-        .attr("y", function(d){return d.y - Math.abs(d.endState - d._initialState)*50 - 4})
-        .attr("width", function(d){return d.duration + 8})
-        .attr("height", function(d){return Math.abs(d.endState - d._initialState)*50 + 8});
-      s.select("rect.resizeHandle")
-        .attr("x", function(d){return d.x + d.duration + 4})
-        .attr("y", function(d){return d.y - Math.abs(d.endState - d._initialState)*50 - 4})
-        .attr("width", function(d){return 16})
-        .attr("height", function(d){return Math.abs(d.endState - d._initialState)*50 + 8});
-    };
-
-    function createLinkNode(selection) {
-      selection
-        .append("g")
-        .classed("link", true)
-        .on("mouseover", function(d) {
-          d3.select(this).classed("hover", true)
-        })
-        .on("mouseout", function(d) {
-          d3.select(this).classed("hover", false)
-        })
-        .call(createLinkVisual)
-        .call(updateLinkNode);
-    };
-
-    function createLinkVisual(s) {
-      s.append("rect")
-        .classed("bodyHandle", true)
-        .call(d3.drag()
-          .on("start", function(d) {
-            d3.select(this).classed("dragged", true);
-          })
-          .on("drag", function(d) {
-            d.x += d3.event.dx;
-            d3.select(this.parentNode).call(updateLinkNode)
-          })
-          .on("end", function(d) {
-            d3.select(this).classed("dragged", false);
-          })
-        );
-      s.append("path").classed("vis", true);
-    };
-
-    function updateLinkNode(s) {
-      /*
-      s.select("rect.bodyHandle")
-        .attr("x", function(d){return d.fromNode.x - 4})
-        .attr("y", function(d){return d.fromNode.y - 4})
-        .attr("width", function(d){return Math.abs(d.toNode.x - d.fromNode.x) + 8})
-        .attr("height", function(d){return Math.abs(d.toNode.y - d.fromNode.y)*50 + 8});
-      */
-      s.select("path")
-        .attr("d", function(d){
-          var pathString
-            = "M" + (d.fromNode.x + d.fromNode.duration) + "," + (d.fromNode.y + d.fromNode.endState * -50)
-            + " L" + d.toNode.x + "," + (d.toNode.y + d.toNode._initialState * -50) ;
-          return pathString;
-        })
-    };
-
-    function changeEditMode(modeString) {
-      editMode = modeString;
-    }
+      ChartView.init({});
+      ChartView.createView(chart, d3.select("#plotPane"));
+    });
     </script>
 
   </body>

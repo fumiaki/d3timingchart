@@ -19,9 +19,11 @@ class Chart {
   constructor(jsonData) {
     this.nodes = new Map();
     this.links = new Map();
+    this.lanes = new Map();
 
     this.createNodes(jsonData.nodes);
     this.createLinks(jsonData.links);
+    this.createLanes(jsonData.lanes);
 
   }
 
@@ -53,7 +55,21 @@ class Chart {
     })
   }
 
-  getLanes() {
+  createLane(paramObj) {
+    var lane = new Lane(paramObj);
+    lane.nodes = this.getNodesOnLane(lane.id);
+    this.lanes.set(lane.id, lane);
+    return lane;
+  }
+  createLanes(paramObjArray) {
+    var self = this;
+    return paramObjArray.map(function(paramObj) {
+      return self.createLane(paramObj);
+    })
+  }
+
+
+  __getLanes() {
     var self = this;
     var laneSet = new Set();;
     Array.from(this.nodes.values()).forEach(function(v,i,a) {
@@ -70,10 +86,10 @@ class Chart {
     })
     return result;
   }
-  getNodesOnLane(laneNo) {
+  getNodesOnLane(laneId) {
     return Array.from(this.nodes.values())
       .filter(function(v, i, a) {
-        return laneNo == v.y;
+        return laneId == v.lane;
       })
       .sort(function(a, b) {
         return a.x - b.x;
@@ -106,6 +122,23 @@ class Link {
       from: "",
       to: "",
       y: 100, x: 0
+    };
+    // Marge paramObject to default object
+    Object.assign(this, defaultValue);
+    Object.assign(this, paramObj);
+  }
+}
+
+class Lane {
+  constructor(paramObj) {
+    var defaultValue = {
+      id: generateUuid(),
+      name:"Lane xxx",
+      color: "#ff9800",
+      stateLabels: [
+        {"v":0, "label": "OFF"},
+        {"v":1, "label": "ON"},
+      ]
     };
     // Marge paramObject to default object
     Object.assign(this, defaultValue);
