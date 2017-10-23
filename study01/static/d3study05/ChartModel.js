@@ -3,22 +3,11 @@
 // Main module
 var ChartFactory = (function(global) {
 
-  function _createChart() {
-    var chart = new Chart();
+  function _createChart(jsonData) {
+    var chart = new Chart(jsonData);
 
     return chart;
   };
-
-  function _createNode() {
-
-    return {};
-  };
-
-  function _createLink() {
-
-    return {};
-  };
-
 
   return {
     createChart: _createChart
@@ -27,9 +16,13 @@ var ChartFactory = (function(global) {
 }(this));
 
 class Chart {
-  constructor() {
+  constructor(jsonData) {
     this.nodes = new Map();
     this.links = new Map();
+
+    this.createNodes(jsonData.nodes);
+    this.createLinks(jsonData.links);
+
   }
 
   createNode(paramObj) {
@@ -47,6 +40,8 @@ class Chart {
 
   createLink(paramObj) {
     var link = new Link(paramObj);
+    link.fromNode = this.nodes.get(link.from);
+    link.toNode = this.nodes.get(link.to);
 
     this.links.set(link.id, link);
     return link;
@@ -57,6 +52,33 @@ class Chart {
       return self.createLink(paramObj);
     })
   }
+
+  getLanes() {
+    var self = this;
+    var laneSet = new Set();;
+    Array.from(this.nodes.values()).forEach(function(v,i,a) {
+      laneSet.add(v.y);
+    })
+
+    var result = [];
+    laneSet.forEach(function(v,i,s) {
+      result.push({
+        id: "Lane " + v,
+        y: v,
+        data: self.getNodesOnLane(v)
+      })
+    })
+    return result;
+  }
+  getNodesOnLane(laneNo) {
+    return Array.from(this.nodes.values())
+      .filter(function(v, i, a) {
+        return laneNo == v.y;
+      })
+      .sort(function(a, b) {
+        return a.x - b.x;
+      })
+  }
 }
 
 class Node {
@@ -65,8 +87,8 @@ class Node {
       id: generateUuid(),
       name:"Event xxx",
       object:"ROBOT xxx",
-      from: 0,
-      to: 1,
+      _initialState: 0,
+      endState: 1,
       duration:50,
       y: 100, x: 0
     };
