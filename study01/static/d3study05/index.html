@@ -49,6 +49,9 @@
       <h2>Timing Chart</h2>
       <button type="button" onClick="ChartView.changeEditMode('move')">Move</button>
       <button type="button" onClick="ChartView.changeEditMode('link')">Link</button>
+      <button type="button" onClick="ChartView.zoomIn()">+</button>
+      <button type="button" onClick="ChartView.zoomOut()">-</button>
+      <button type="button" onClick="ChartView.resetDisplay()">reset</button>
       <p id="console1"></p>
       <p id="console2"></p>
       <p id="console3"></p>
@@ -61,7 +64,8 @@
       var chart = ChartFactory.createChart(json);
 
       ChartView.init({});
-      ChartView.createView(chart, d3.select("#plotPane"));
+      ChartView.setData(chart);
+      //ChartView.createView(chart, d3.select("#plotPane"));
     });
     </script>
 

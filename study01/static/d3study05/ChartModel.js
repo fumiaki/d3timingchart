@@ -57,7 +57,11 @@ class Chart {
 
   createLane(paramObj) {
     var lane = new Lane(paramObj);
-    lane.nodes = this.getNodesOnLane(lane.id);
+    lane.nodes = this._getNodesOnLane(lane.id);
+    lane.nodes.forEach(function(node) {
+      node.lane = lane;
+    })
+
     this.lanes.set(lane.id, lane);
     return lane;
   }
@@ -68,25 +72,7 @@ class Chart {
     })
   }
 
-
-  __getLanes() {
-    var self = this;
-    var laneSet = new Set();;
-    Array.from(this.nodes.values()).forEach(function(v,i,a) {
-      laneSet.add(v.y);
-    })
-
-    var result = [];
-    laneSet.forEach(function(v,i,s) {
-      result.push({
-        id: "Lane " + v,
-        y: v,
-        data: self.getNodesOnLane(v)
-      })
-    })
-    return result;
-  }
-  getNodesOnLane(laneId) {
+  _getNodesOnLane(laneId) {
     return Array.from(this.nodes.values())
       .filter(function(v, i, a) {
         return laneId == v.lane;

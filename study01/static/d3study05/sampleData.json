@@ -3,20 +3,17 @@
     {
       "id": "lane01",
       "name": "ROBOT 1",
-      "color": "#ff9800",
+      "color": "#26a69a",
       "yOffset": 100,
       "stateLabels": [
         {"v":0, "label": "原点"},
-        {"v":1, "label": "コアストッカーA位置"},
-        {"v":2, "label": "コアストッカーB位置"},
-        {"v":3, "label": "内径溶接待機位置"},
-        {"v":4, "label": "内径セット位置"}
+        {"v":1, "label": "コアストッカーA位置"}
       ]
     },
     {
       "id": "lane02",
       "name": "ROBOT 1.HAND",
-      "color": "#ff9800",
+      "color": "#d4e157",
       "yOffset": 200,
       "stateLabels": [
         {"v":0, "label": "アンクランプ"},
@@ -26,7 +23,7 @@
     {
       "id": "lane03",
       "name": "ROBOT 2",
-      "color": "#ffc107",
+      "color": "#607d8b",
       "yOffset": 400,
       "stateLabels": [
         {"v":0, "label": "原点"},
@@ -34,15 +31,6 @@
         {"v":2, "label": "内径取り出し位置"},
         {"v":3, "label": "外径溶接待機位置"},
         {"v":4, "label": "外径セット位置"}
-      ]
-    },
-    {
-      "id": "lane04",
-      "name": "ROBOT 2.HAND",
-      "color": "#ffc107",
-      "stateLabels": [
-        {"v":0, "label": "アンクランプ"},
-        {"v":1, "label": "クランプ"}
       ]
     }
   ],
@@ -53,6 +41,7 @@
       "name":"Event 1",
       "lane": "lane01",
       "_initialState": 0, "endState": 1, "duration":50,
+      "t": 0,
       "y": 100, "x": 0
     },
     {
@@ -60,6 +49,7 @@
       "name":"Event 2",
       "lane": "lane01",
       "_initialState": 1, "endState": 0, "duration":50,
+      "t": 200,
       "y": 100, "x": 200
     },
     {
@@ -67,6 +57,7 @@
       "name":"Event 3",
       "lane": "lane02",
       "_initialState": 0, "endState": 1, "duration":100,
+      "t": 50,
       "y": 200, "x": 50
     },
     {
@@ -74,6 +65,7 @@
       "name":"Event 4",
       "lane": "lane02",
       "_initialState": 1, "endState": 0, "duration":25,
+      "t": 250,
       "y": 200, "x": 250
     },
     {
@@ -81,6 +73,7 @@
       "name":"Event 6",
       "lane": "lane03",
       "_initialState": 2, "endState": 0, "duration":0,
+      "t": 300,
       "y": 400, "x": 300
     },
     {
@@ -88,6 +81,7 @@
       "name":"Event 6",
       "lane": "lane03",
       "_initialState": 1, "endState": 2, "duration":50,
+      "t": 200,
       "y": 400, "x": 200
     },
     {
@@ -95,6 +89,7 @@
       "name":"Event 5",
       "lane": "lane03",
       "_initialState": 0, "endState": 1, "duration":50,
+      "t": 0,
       "y": 400, "x": 0
     },
     {
@@ -102,6 +97,7 @@
       "name":"Event 8",
       "lane": "lane03",
       "_initialState": 0, "endState": 1, "duration":0,
+      "t": 350,
       "y": 400, "x": 350
     }
   ],

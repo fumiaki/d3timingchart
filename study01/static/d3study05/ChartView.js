@@ -1,7 +1,7 @@
 // Main module
 var ChartView = (function(d3) {
-  //var _editMode = "move";
-  var _editMode = "link";
+  var _editMode = "move";
+  //var _editMode = "link";
   //var _chartModel;
 
   var _config = {};
@@ -25,11 +25,10 @@ var ChartView = (function(d3) {
   };
 
   function _createConfigObject(configParam) {
-
     // Create default config object
     _config = {
-      width: 640,
-      height: 480,
+      width: 800,
+      height: 640,
       offset: {x: 0, y: 0},
       zoom:{x: 1, y: 1},
 
@@ -195,44 +194,44 @@ var ChartView = (function(d3) {
       .attr("y", -_config.offset.y);
   }
 
-  function _setData(data) {
-    _model = data;
+  function _setData(chartModel) {
+    _model = chartModel;
 
     // Compute domain range and offset position
     var yMargin = 2;
     var yOffset = 0;
 
-    var rangeArray = _data.lanes.map(function(elem) {
-      elem.xRange = d3.extent(elem.data, function(d){return d.t});
-      elem.yRange = d3.extent(elem.stateLabels, function(d){return d.v});
+    var rangeArray = Array.from(_model.lanes.values()).map(function(lane) {
+      lane.xRange = d3.extent(lane.nodes, function(d){return d.x});
+      lane.yRange = d3.extent(lane.stateLabels, function(d){return d.v});
 
-      yOffset = yOffset - elem.yRange[1] - yMargin;
-      elem.yOffset = yOffset;
+      yOffset = yOffset - lane.yRange[1] - yMargin;
+      lane.yOffset = yOffset;
 
       // Add Lane Separator (Lane Label)
-      var laneLabel = {v: elem.yRange[1] + 1.5, label: elem.name, type: "separator"};
-      elem.yLabels.push(laneLabel);
-      return {id: elem.id, x: elem.xRange, y: elem.yRange};
+      var laneLabel = {v: lane.yRange[1] + 1.5, label: lane.name, type: "separator"};
+      lane.stateLabels.push(laneLabel);
+      return {id: lane.id, x: lane.xRange, y: lane.yRange};
     });
     //console.log(rangeArray);
 
-    _data.xRange = d3.extent(
+    _model.xRange = d3.extent(
       d3.merge(
-        _data.map(function(elem) {return elem.xRange})
+        Array.from(_model.lanes.values()).map(function(lane) {return lane.xRange})
       )
     );
     //console.log(xRange);
-    _data.yRange = [yOffset - yMargin, 0];
+    _model.yRange = [yOffset - yMargin, 0];
 
     _xScale
-      .domain(_data.xRange);
+      .domain(_model.xRange);
 
     _yScale
-      .domain(_data.yRange);
+      .domain(_model.yRange);
 
     // Preprocess data
-    _data.forEach(function(d, i, a){
-      _padData(d);
+    Array.from(_model.lanes.values()).forEach(function(d, i, a){
+      //_padData(d);
       _offsetData(d);
     });
 
@@ -240,7 +239,7 @@ var ChartView = (function(d3) {
     var xTicks = _xAxis.selectAll(".tick");
     //xTicks.remove();
     xTicks
-      .data(d3.range(_data.xRange[0], _data.xRange[1], 1))
+      .data(d3.range(_model.xRange[0], _model.xRange[1], 50))
       .enter()
       .call(function(selection) {
         // create x-tick element
@@ -256,8 +255,8 @@ var ChartView = (function(d3) {
 
     // SetUp yAxis
     var tickLabels = d3.merge(
-      _data.map(function(elem) {
-        return elem.yLabels;
+      Array.from(_model.lanes.values()).map(function(lane) {
+        return lane.stateLabels;
       })
     );
     //console.log(tickLabels);
@@ -283,47 +282,86 @@ var ChartView = (function(d3) {
       });
 
     // Setup chart Path
-    _plotPane.selectAll("path")
-      .data(_data)
-      .enter()
-      .append("path");
+    _setScale();
+    _updateAxis();
+    _createView();
 
-    _updateDisplay();
+    //_updateDisplay();
   }
 
   // チャートの前後に予備データ追加（塗りつぶしの始点をY=0に合わせるため
   function _padData(laneData) {
-    var data = laneData.data;
-    data.unshift({t:d3.min(data, function(d){return d.t}), v:0});
-    data.push({t:d3.max(data, function(d){return d.t}), v:0});
+    var nodes = laneData.nodes;
+    nodes.unshift({t:d3.min(nodes, function(d){return d.t}), _initialState:0, endState:0, duration:0});
+    nodes.push({t:d3.max(nodes, function(d){return d.t}), _initialState:0, endState:0, duration:0});
   }
 
   // 複数のチャートを縦に並べるため、チャート毎にY軸の値をOffsetする
   function _offsetData(laneData) {
-    laneData.data.forEach(function(d, i, a){d.v += laneData.yOffset});
-    laneData.yLabels.forEach(function(d, i, a){d.v += laneData.yOffset});
+    /*
+    laneData.nodes.forEach(function(node, i, a){
+      node._initialState += laneData.yOffset;
+      node.endState += laneData.yOffset;
+    });
+    */
+    laneData.stateLabels.forEach(function(label, i, a){label.v += laneData.yOffset});
   }
 
+  function _setScale() {
+    _xScale
+      .range([
+        0,
+        _config.plotPane.width * _config.zoom.x
+      ]);
+
+    _yScale
+      .range([
+        (-_model.yRange[0]) * _config.zoom.y * _yUnit,
+        0
+      ]);
+  }
+
+  function _updateAxis() {
+    _xAxis.selectAll("g")
+      .attr("transform", function(d) {return "translate(" + _xScale(d) + ", 0)"});
+
+    _yAxis.selectAll("g")
+      .attr("transform", function(d) {return "translate(0, " + _yScale(d.v) + ")"});
+  };
+
+  function _updateDisplay() {
+    _setScale();
+    _updateAxis();
+    _scroll();
+
+    _plotPane.selectAll(".lane")
+      .call(_updateLaneNode);
+
+    _plotPane.selectAll(".event")
+      .call(_updateEventNode);
+
+    _plotPane.selectAll(".link")
+      .call(_updateLinkNode);
+
+  };
 
 
-  function _createView(chartModel) {
-    _model = chartModel;
-
+  function _createView() {
     console.log("_createView");
     console.log(_model);
 
     _plotPane.selectAll(".lane")
-      .data(Array.from(chartModel.lanes.values()))
+      .data(Array.from(_model.lanes.values()))
       .enter()
       .call(_createLaneNode);
 
     _plotPane.selectAll(".event")
-      .data(Array.from(chartModel.nodes.values()))
+      .data(Array.from(_model.nodes.values()))
       .enter()
       .call(_createEventNode);
 
     _plotPane.selectAll(".link")
-      .data(Array.from(chartModel.links.values()))
+      .data(Array.from(_model.links.values()))
       .enter()
       .call(_createLinkNode);
   };
@@ -344,16 +382,19 @@ var ChartView = (function(d3) {
   };
   function _updateLaneNode(s) {
     s.select("path")
-      .attr("d", function(d0) {
-        var pathStr = "M0," + d0.yOffset;
-        d0.nodes.forEach(function(d,i,a) {
+      .style("fill", function(lane){return lane.color})
+      .attr("d", function(lane) {
+        var pathStr = "M0," + _yScale(lane.yOffset)
+          + " v" + _yScale(lane.nodes[0]._initialState);
+        lane.nodes.forEach(function(node) {
           //console.log(d)
           pathStr
-            += " L" + d.x + "," + (d.y + d._initialState*-_yUnit)
-            + " l" + d.duration + "," + ((d.endState - d._initialState)*-_yUnit);
+            += " L" + _xScale(node.t) + "," + _yScale(lane.yOffset + node._initialState)
+            + " l" + _xScale(node.duration) + "," + _yScale(node.endState - node._initialState);
         });
-        pathStr += " H400";
-        console.log(pathStr);
+        pathStr += " H" + _xScale(_model.xRange[1])
+          + " V" + _yScale(lane.yOffset);
+        //console.log(pathStr);
         return pathStr;
       });
   };
@@ -383,19 +424,19 @@ var ChartView = (function(d3) {
         })
         .on("drag", function(d) {
           if (_editMode == "move") {
-            d.x += d3.event.dx;
+            d.t += _xScale.invert(d3.event.dx);
             d3.select(this.parentNode).call(_updateEventNode)
 
             d3.select("#plotPane").selectAll(".link")
               .call(_updateLinkNode);
-            d3.select("#plotPane").selectAll(".lane")
+            d3.select("#" + d.lane.id)
               .call(_updateLaneNode);
 
           } else if(_editMode == "link") {
 
           }
 
-          d3.select("#console1").text(JSON.stringify(d));
+          d3.select("#console1").text(JSON.stringify(d, function(k,v){if(k=="lane") {return {}} else {return v}}));
           //d3.select("#console2").text(JSON.stringify(d3.event));
           d3.select("#console3").text(d3.mouse(this));
         })
@@ -425,15 +466,16 @@ var ChartView = (function(d3) {
           d3.select(this).classed("dragged", true);
         })
         .on("drag", function(d) {
-          d.duration = Math.max(d.duration + d3.event.dx, 0);
+          d.duration = d.duration + _xScale.invert(d3.event.dx);
+          d.duration = Math.max(d.duration, 0);
           d3.select(this.parentNode).call(_updateEventNode)
 
           d3.select("#plotPane").selectAll(".link")
             .call(_updateLinkNode);
-          d3.select("#plotPane").selectAll(".lane")
+          d3.select("#" + d.lane.id)
             .call(_updateLaneNode);
 
-          d3.select("#console1").text(JSON.stringify(d));
+          d3.select("#console1").text(JSON.stringify(d, function(k,v){if(k=="lane") {return {}} else {return v}}));
           //d3.select("#console2").text(JSON.stringify(d3.event));
           d3.select("#console3").text(d3.mouse(this));
         })
@@ -444,25 +486,26 @@ var ChartView = (function(d3) {
   };
 
   function _updateEventNode(s) {
-    /*
-    s.select("path")
-      .attr("d", function(d){
-        var pathString
-          = "M" + d.x + "," + (d.y + d._initialState*-50)
-          + " l" + d.duration + "," + ((d.endState - d._initialState)*-50);
-        return pathString;
-      })
-    */
-    s.select("rect.bodyHandle")
-      .attr("x", function(d){return d.x - 4})
-      .attr("y", function(d){return d.y - Math.abs(d.endState - d._initialState)*_yUnit - 4})
-      .attr("width", function(d){return d.duration + 8})
-      .attr("height", function(d){return Math.abs(d.endState - d._initialState)*_yUnit + 8});
-    s.select("rect.resizeHandle")
-      .attr("x", function(d){return d.x + d.duration + 4})
-      .attr("y", function(d){return d.y - Math.abs(d.endState - d._initialState)*_yUnit - 4})
+    s.select(".bodyHandle")
+      /*
+      .attr("d", function(d) {
+        var pathStr
+          = "M" + (_xScale(d.t) - 4) + "," + (_yScale(d.lane.yOffset + d._initialState) - 4)
+          + "l" + _xScale(d.duration) + "," + 0
+        ;
+        console.log(pathStr);
+        return pathStr;
+      });
+      */
+      .attr("x", function(d){return _xScale(d.t) - 4})
+      .attr("y", function(d){return _yScale(d.lane.yOffset + Math.max(d._initialState, d.endState)) - 4})
+      .attr("width", function(d){return _xScale(d.duration) + 8})
+      .attr("height", function(d){return Math.abs(_yScale(d.endState - d._initialState)) + 8});
+    s.select(".resizeHandle")
+      .attr("x", function(d){return _xScale(d.t + d.duration) + 4})
+      .attr("y", function(d){return _yScale(d.lane.yOffset + Math.max(d._initialState, d.endState)) - 4})
       .attr("width", function(d){return 16})
-      .attr("height", function(d){return Math.abs(d.endState - d._initialState)*_yUnit + 8});
+      .attr("height", function(d){return Math.abs(_yScale(d.endState - d._initialState)) + 8});
   };
 
   function _createLinkNode(selection) {
@@ -508,11 +551,30 @@ var ChartView = (function(d3) {
     s.select("path")
       .attr("d", function(d){
         var pathString
-          = "M" + (d.fromNode.x + d.fromNode.duration) + "," + (d.fromNode.y + d.fromNode.endState * -_yUnit)
-          + " L" + d.toNode.x + "," + (d.toNode.y + d.toNode._initialState * -_yUnit) ;
+          = "M" + _xScale(d.fromNode.t + d.fromNode.duration) + "," + _yScale(d.fromNode.lane.yOffset + d.fromNode.endState)
+          + " L" + _xScale(d.toNode.t) + "," + _yScale(d.toNode.lane.yOffset + d.toNode._initialState) ;
         return pathString;
       })
   };
+
+
+
+  function _zoomIn() {
+    _config.zoom.x += 0.1;
+    _updateDisplay();
+  }
+
+  function _zoomOut() {
+    _config.zoom.x -= 0.1;
+    _updateDisplay();
+  }
+
+  function _resetDisplay() {
+    _config.offset = {x: 0, y: 0};
+    _config.zoom = {x: 1, y: 1};
+    _updateDisplay();
+  }
+
 
   function _changeEditMode(modeString) {
     _editMode = modeString;
@@ -520,8 +582,12 @@ var ChartView = (function(d3) {
 
   return {
     init: _init,
+    setData: _setData,
     createView: _createView,
-    changeEditMode: _changeEditMode
+    changeEditMode: _changeEditMode,
+    zoomIn: _zoomIn,
+    zoomOut: _zoomOut,
+    resetDisplay: _resetDisplay
   };
 
 }(d3));
