@@ -41,64 +41,56 @@
       "name":"Event 1",
       "lane": "lane01",
       "_initialState": 0, "endState": 1, "duration":50,
-      "t": 0,
-      "y": 100, "x": 0
+      "t": 0
     },
     {
       "id":"e02",
       "name":"Event 2",
       "lane": "lane01",
       "_initialState": 1, "endState": 0, "duration":50,
-      "t": 200,
-      "y": 100, "x": 200
+      "t": 200
     },
     {
       "id":"e03",
       "name":"Event 3",
       "lane": "lane02",
       "_initialState": 0, "endState": 1, "duration":100,
-      "t": 50,
-      "y": 200, "x": 50
+      "t": 50
     },
     {
       "id":"e04",
       "name":"Event 4",
       "lane": "lane02",
       "_initialState": 1, "endState": 0, "duration":25,
-      "t": 250,
-      "y": 200, "x": 250
+      "t": 250
     },
     {
       "id":"e07",
       "name":"Event 6",
       "lane": "lane03",
       "_initialState": 2, "endState": 0, "duration":0,
-      "t": 300,
-      "y": 400, "x": 300
+      "t": 300
     },
     {
       "id":"e06",
       "name":"Event 6",
       "lane": "lane03",
       "_initialState": 1, "endState": 2, "duration":50,
-      "t": 200,
-      "y": 400, "x": 200
+      "t": 200
     },
     {
       "id":"e05",
       "name":"Event 5",
       "lane": "lane03",
       "_initialState": 0, "endState": 1, "duration":50,
-      "t": 0,
-      "y": 400, "x": 0
+      "t": 0
     },
     {
       "id":"e08",
       "name":"Event 8",
       "lane": "lane03",
       "_initialState": 0, "endState": 1, "duration":0,
-      "t": 350,
-      "y": 400, "x": 350
+      "t": 350
     }
   ],
 

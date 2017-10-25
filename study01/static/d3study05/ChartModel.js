@@ -78,7 +78,7 @@ class Chart {
         return laneId == v.lane;
       })
       .sort(function(a, b) {
-        return a.x - b.x;
+        return a.t - b.t;
       })
   }
 }

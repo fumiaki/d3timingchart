@@ -202,7 +202,7 @@ var ChartView = (function(d3) {
     var yOffset = 0;
 
     var rangeArray = Array.from(_model.lanes.values()).map(function(lane) {
-      lane.xRange = d3.extent(lane.nodes, function(d){return d.x});
+      lane.xRange = d3.extent(lane.nodes, function(d){return d.t});
       lane.yRange = d3.extent(lane.stateLabels, function(d){return d.v});
 
       yOffset = yOffset - lane.yRange[1] - yMargin;
