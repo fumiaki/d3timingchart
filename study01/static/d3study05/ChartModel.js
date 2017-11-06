@@ -28,7 +28,7 @@ class Chart {
   }
 
   createNode(paramObj) {
-    var node = new Node(paramObj);
+    var node = new Node(paramObj, this);
 
     this.nodes.set(node.id, node);
     return node;
@@ -41,7 +41,7 @@ class Chart {
   }
 
   createLink(paramObj) {
-    var link = new Link(paramObj);
+    var link = new Link(paramObj, this);
     link.fromNode = this.nodes.get(link.from);
     link.toNode = this.nodes.get(link.to);
 
@@ -56,8 +56,9 @@ class Chart {
   }
 
   createLane(paramObj) {
-    var lane = new Lane(paramObj);
-    lane.nodes = this._getNodesOnLane(lane.id);
+    var lane = new Lane(paramObj, this);
+    //console.log(lane.nodes)
+    //lane.nodes = this._getNodesOnLane(lane.id);
     lane.nodes.forEach(function(node) {
       node.lane = lane;
     })
@@ -71,20 +72,10 @@ class Chart {
       return self.createLane(paramObj);
     })
   }
-
-  _getNodesOnLane(laneId) {
-    return Array.from(this.nodes.values())
-      .filter(function(v, i, a) {
-        return laneId == v.lane;
-      })
-      .sort(function(a, b) {
-        return a.t - b.t;
-      })
-  }
 }
 
 class Node {
-  constructor(paramObj) {
+  constructor(paramObj, parent) {
     var defaultValue = {
       id: generateUuid(),
       name:"Event xxx",
@@ -97,11 +88,12 @@ class Node {
     // Marge paramObject to default object
     Object.assign(this, defaultValue);
     Object.assign(this, paramObj);
+    this.parent = parent;
   }
 }
 
 class Link {
-  constructor(paramObj) {
+  constructor(paramObj, parent) {
     var defaultValue = {
       id: generateUuid(),
       name:"Link xxx",
@@ -112,11 +104,12 @@ class Link {
     // Marge paramObject to default object
     Object.assign(this, defaultValue);
     Object.assign(this, paramObj);
+    this.parent = parent;
   }
 }
 
 class Lane {
-  constructor(paramObj) {
+  constructor(paramObj, parent) {
     var defaultValue = {
       id: generateUuid(),
       name:"Lane xxx",
@@ -129,6 +122,15 @@ class Lane {
     // Marge paramObject to default object
     Object.assign(this, defaultValue);
     Object.assign(this, paramObj);
+    this.parent = parent;
+  }
+
+  get nodes() {
+    var self = this;
+    var nodes_ = Array.from(self.parent.nodes.values())
+      .filter((v, i, a) => self.id == v.lane || self.id == v.lane.id)
+      .sort((a, b) => a.t - b.t);
+    return nodes_;
   }
 }
 

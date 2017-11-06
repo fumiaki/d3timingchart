@@ -431,6 +431,9 @@ var ChartView = (function(d3) {
     //s.append("path").classed("vis", true);
     s.append("rect")
       .classed("bodyHandle", true)
+      .on("contextmenu", (d, i) => {
+        d3.event.preventDefault();
+        console.log(d)})
       .call(d3.drag()
         .on("start", function(d) {
           d3.select(this).classed("dragged", true);
@@ -457,7 +460,7 @@ var ChartView = (function(d3) {
           d3.select(this).classed("dragged", false);
 
           if(_editMode == "link") {
-            var dropTo = d3.select("#plotPane").select(".event.hover");
+            var dropTo = d3.select("#plotPane").select(".event:hover");
             var newLink = _model.createLink({
               name: "New Link",
               from: d3.select(this).datum().id,
