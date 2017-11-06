@@ -54,6 +54,9 @@ var ChartView = (function(d3) {
       }
     };
 
+    configParam.xAxis = Object.assign(_config.xAxis, configParam.xAxis);
+    configParam.yAxis = Object.assign(_config.yAxis, configParam.yAxis);
+    configParam.plotPane = Object.assign(_config.plotPane, configParam.plotPane);
     // Marge paramObject to default config object
     return Object.assign(_config, configParam);
   };
@@ -377,8 +380,9 @@ var ChartView = (function(d3) {
 
   function _createLaneVisual(s) {
     s.append("path")
-      .classed("vis", true)
-      ;
+      .classed("vis", true);
+    s.append("rect")
+      .classed("handle", true);
   };
   function _updateLaneNode(s) {
     s.select("path")
@@ -397,6 +401,21 @@ var ChartView = (function(d3) {
         //console.log(pathStr);
         return pathStr;
       });
+
+      s.select("rect")
+        .attr("x", function(lane){return 0 - 4})
+        .attr("y", function(lane){return _yScale(d3.max(lane.stateLabels, function(label){return label.v})) - 4})
+        .attr("width", function(lane){return _xScale(_model.xRange[1]) + 8})
+        .attr("height", function(lane){return _yScale(d3.min(lane.stateLabels, function(label){return label.v}) - d3.max(lane.stateLabels, function(label){return label.v})) + 4})
+        .on("click", function(lane) {
+          d3.select(this).classed("selected", true);
+          _model.createNode({lane: lane});
+          _createView();
+          console.log(_model);
+        })
+        .on("mouseout", function(d) {
+          d3.select(this).classed("selected", false)
+        })
   };
 
   function _createEventNode(selection) {
@@ -404,12 +423,6 @@ var ChartView = (function(d3) {
       .append("g")
       .attr("id", function(d) {return d.id})
       .classed("event", true)
-      .on("mouseover", function(d) {
-        d3.select(this).classed("hover", true)
-      })
-      .on("mouseout", function(d) {
-        d3.select(this).classed("hover", false)
-      })
       .call(_createEventVisual)
       .call(_updateEventNode);
   };
@@ -512,12 +525,6 @@ var ChartView = (function(d3) {
     selection
       .append("g")
       .classed("link", true)
-      .on("mouseover", function(d) {
-        d3.select(this).classed("hover", true)
-      })
-      .on("mouseout", function(d) {
-        d3.select(this).classed("hover", false)
-      })
       .call(_createLinkVisual)
       .call(_updateLinkNode);
   };
@@ -578,6 +585,18 @@ var ChartView = (function(d3) {
 
   function _changeEditMode(modeString) {
     _editMode = modeString;
+
+    if(_editMode =="newEvent") {
+      d3.selectAll(".event")
+        .classed("hide", true);
+      d3.selectAll(".lane .handle")
+        .classed("hide", false);
+    } else {
+      d3.selectAll(".event")
+        .classed("hide", false);
+      d3.selectAll(".lane .handle")
+        .classed("hide", true);
+    }
   }
 
   return {

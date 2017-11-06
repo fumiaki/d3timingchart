@@ -22,12 +22,27 @@ text {
   font-size: 1.25em;
 }
 
-.chart path {
+.chart .vis {
   stroke: #616161;
   stroke-width: 4;
   fill: #ffc000;
   fill-opacity: 0.5;
   /*marker-mid: url('#chartMarker');*/
+}
+.chart .lane .handle {
+  fill: #00bcd4;
+  stroke: none;
+  opacity: 0.2;
+}
+.chart .lane .handle.hide {
+  display: none;
+}
+
+.chart  .lane .handle:hover {
+  fill: #00bcd4;
+  opacity: 0.2;
+  stroke: #9c27b0;
+  stroke-width: 4;
 }
 
 .marker {
@@ -92,7 +107,7 @@ text {
 }
 
 
-.chart .event.hover rect {
+.chart .event:hover rect {
   fill: #00bcd4;
   opacity: 0.5;
   stroke: #9c27b0;
@@ -104,6 +119,10 @@ text {
   opacity: 0.5;
   stroke: #f44336;
   stroke-width: 8;
+}
+
+.chart .event.hide {
+  display: none;
 }
 
 .Red_500 {

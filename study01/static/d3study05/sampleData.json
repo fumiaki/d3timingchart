@@ -3,17 +3,20 @@
     {
       "id": "lane01",
       "name": "ROBOT 1",
-      "color": "#26a69a",
+      "color": "#ff9800",
       "yOffset": 100,
       "stateLabels": [
         {"v":0, "label": "原点"},
-        {"v":1, "label": "コアストッカーA位置"}
+        {"v":1, "label": "コアストッカーA位置"},
+        {"v":2, "label": "コアストッカーB位置"},
+        {"v":3, "label": "内径溶接待機位置"},
+        {"v":4, "label": "内径セット位置"}
       ]
     },
     {
       "id": "lane02",
       "name": "ROBOT 1.HAND",
-      "color": "#d4e157",
+      "color": "#ffee58",
       "yOffset": 200,
       "stateLabels": [
         {"v":0, "label": "アンクランプ"},
@@ -23,7 +26,7 @@
     {
       "id": "lane03",
       "name": "ROBOT 2",
-      "color": "#607d8b",
+      "color": "#9ccc65",
       "yOffset": 400,
       "stateLabels": [
         {"v":0, "label": "原点"},
@@ -37,33 +40,70 @@
 
   "nodes": [
     {
-      "id":"e01",
+      "id":"l01_e01",
       "name":"Event 1",
       "lane": "lane01",
-      "_initialState": 0, "endState": 1, "duration":50,
+      "_initialState": 3, "endState": 4, "duration":200,
       "t": 0
     },
     {
-      "id":"e02",
+      "id":"l01_e02",
       "name":"Event 2",
       "lane": "lane01",
+      "_initialState": 4, "endState": 1, "duration":300,
+      "t": 250
+    },
+    {
+      "id":"l01_e03",
+      "name":"Event 3",
+      "lane": "lane01",
+      "_initialState": 1, "endState": 2, "duration":200,
+      "t": 600
+    },
+    {
+      "id":"l01_e04",
+      "name":"Event 4",
+      "lane": "lane01",
+      "_initialState": 2, "endState": 3, "duration":100,
+      "t": 900
+    },
+    {
+      "id":"l01_dummy",
+      "name":"Dummy",
+      "lane": "lane01",
+      "_initialState": 3, "endState": 3, "duration":0,
+      "t": 1200
+    },
+
+    {
+      "id":"l02_e01",
+      "name":"Event 3",
+      "lane": "lane02",
       "_initialState": 1, "endState": 0, "duration":50,
       "t": 200
     },
     {
-      "id":"e03",
-      "name":"Event 3",
-      "lane": "lane02",
-      "_initialState": 0, "endState": 1, "duration":100,
-      "t": 50
-    },
-    {
-      "id":"e04",
+      "id":"l02_e02",
       "name":"Event 4",
       "lane": "lane02",
-      "_initialState": 1, "endState": 0, "duration":25,
-      "t": 250
+      "_initialState": 0, "endState": 1, "duration":50,
+      "t": 550
     },
+    {
+      "id":"l02_e03",
+      "name":"Event 4",
+      "lane": "lane02",
+      "_initialState": 1, "endState": 0, "duration":50,
+      "t": 800
+    },
+    {
+      "id":"l02_e04",
+      "name":"Event 4",
+      "lane": "lane02",
+      "_initialState": 0, "endState": 1, "duration":50,
+      "t": 850
+    },
+
     {
       "id":"e07",
       "name":"Event 6",
@@ -97,23 +137,23 @@
   "links": [
     {
       "name": "Link 1",
-      "from": "e01",
-      "to": "e03"
+      "from": "l01_e01",
+      "to": "l02_e01"
     },
     {
       "name": "Link 2",
-      "from": "e02",
-      "to": "e04"
+      "from": "l02_e01",
+      "to": "l01_e02"
     },
     {
       "name": "Link 3",
-      "from": "e05",
-      "to": "e03"
+      "from": "l01_e02",
+      "to": "l02_e02"
     },
     {
       "name": "Link 4",
-      "from": "e04",
-      "to": "e07"
+      "from": "l02_e02",
+      "to": "l01_e03"
     }
   ]
 }

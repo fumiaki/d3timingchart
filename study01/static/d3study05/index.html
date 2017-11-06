@@ -52,6 +52,7 @@
       <button type="button" onClick="ChartView.zoomIn()">+</button>
       <button type="button" onClick="ChartView.zoomOut()">-</button>
       <button type="button" onClick="ChartView.resetDisplay()">reset</button>
+      <button type="button" onClick="ChartView.changeEditMode('newEvent')">event</button>
       <p id="console1"></p>
       <p id="console2"></p>
       <p id="console3"></p>
@@ -63,7 +64,7 @@
 
       var chart = ChartFactory.createChart(json);
 
-      ChartView.init({});
+      ChartView.init({width:800, xAxis:{height:240},yAxis:{width:160}});
       ChartView.setData(chart);
       //ChartView.createView(chart, d3.select("#plotPane"));
     });
