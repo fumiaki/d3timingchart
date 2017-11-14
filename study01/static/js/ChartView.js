@@ -148,20 +148,10 @@ var ChartView = (function(d3) {
     // Handle window resize event
     d3.select(window)
       .on("resize", function() {
-        //####TEST####
-        console.log("resized!");
-        var width = _svg.node().getBoundingClientRect().width;
-        console.log("window.innerWidth : " + window.innerWidth);
-        console.log("svg.getBoundingClientRect.width : " + _svg.node().getBoundingClientRect().width);
-        //_svg.attr("width", window.innerWidth);
-        //########
-
         _config.width = window.innerWidth;
         _config.height = window.innerHeight;
 
         _setSVGElementSize();
-        //_updateDisplay();
-
       });
   };
   function dragStarted(d) {
@@ -216,14 +206,12 @@ var ChartView = (function(d3) {
       lane.stateLabels.push(laneLabel);
       return {id: lane.id, x: lane.xRange, y: lane.yRange};
     });
-    //console.log(rangeArray);
 
     _model.xRange = d3.extent(
       d3.merge(
         Array.from(_model.lanes.values()).map(function(lane) {return lane.xRange})
       )
     );
-    //console.log(xRange);
     _model.yRange = [yOffset - yMargin, 0];
 
     _xScale
@@ -234,7 +222,6 @@ var ChartView = (function(d3) {
 
     // Preprocess data
     Array.from(_model.lanes.values()).forEach(function(d, i, a){
-      //_padData(d);
       _offsetData(d);
     });
 
@@ -262,7 +249,6 @@ var ChartView = (function(d3) {
         return lane.stateLabels;
       })
     );
-    //console.log(tickLabels);
 
     var yTicks = _yAxis.selectAll(".tick");
     //yTicks.remove();
@@ -284,29 +270,16 @@ var ChartView = (function(d3) {
           .text(function(d){return d.label});
       });
 
-    // Setup chart Path
     _setScale();
     _updateAxis();
+
     _createView();
-
-    //_updateDisplay();
+    _changeEditMode("move");
   }
 
-  // チャートの前後に予備データ追加（塗りつぶしの始点をY=0に合わせるため
-  function _padData(laneData) {
-    var nodes = laneData.nodes;
-    nodes.unshift({t:d3.min(nodes, function(d){return d.t}), _initialState:0, endState:0, duration:0});
-    nodes.push({t:d3.max(nodes, function(d){return d.t}), _initialState:0, endState:0, duration:0});
-  }
 
   // 複数のチャートを縦に並べるため、チャート毎にY軸の値をOffsetする
   function _offsetData(laneData) {
-    /*
-    laneData.nodes.forEach(function(node, i, a){
-      node._initialState += laneData.yOffset;
-      node.endState += laneData.yOffset;
-    });
-    */
     laneData.stateLabels.forEach(function(label, i, a){label.v += laneData.yOffset});
   }
 
@@ -350,9 +323,6 @@ var ChartView = (function(d3) {
 
 
   function _createView() {
-    console.log("_createView");
-    console.log(_model);
-
     _plotPane.selectAll(".lane")
       .data(Array.from(_model.lanes.values()))
       .enter()
@@ -388,13 +358,16 @@ var ChartView = (function(d3) {
     s.select("path")
       .style("fill", function(lane){return lane.color})
       .attr("d", function(lane) {
+        var state = lane.nodes[lane.nodes.length -1].endState;
         var pathStr = "M0," + _yScale(lane.yOffset)
-          + " v" + _yScale(lane.nodes[0]._initialState);
+          + " v" + _yScale(state);
         lane.nodes.forEach(function(node) {
           //console.log(d)
+          node._initialState = state;
           pathStr
-            += " L" + _xScale(node.t) + "," + _yScale(lane.yOffset + node._initialState)
-            + " l" + _xScale(node.duration) + "," + _yScale(node.endState - node._initialState);
+            += " L" + _xScale(node.t) + "," + _yScale(lane.yOffset + state)
+            + " l" + _xScale(node.duration) + "," + _yScale(node.endState - state);
+          state = node.endState;
         });
         pathStr += " H" + _xScale(_model.xRange[1])
           + " V" + _yScale(lane.yOffset);
@@ -441,13 +414,15 @@ var ChartView = (function(d3) {
         .on("drag", function(d) {
           if (_editMode == "move") {
             d.t += _xScale.invert(d3.event.dx);
-            d3.select(this.parentNode).call(_updateEventNode)
-
-            d3.select("#plotPane").selectAll(".link")
-              .call(_updateLinkNode);
+            /*
             d3.select("#" + d.lane.id)
               .call(_updateLaneNode);
-
+            d3.select(this.parentNode)
+              .call(_updateEventNode)
+            d3.select("#plotPane").selectAll(".link")
+              .call(_updateLinkNode);
+            */
+            _updateDisplay();
           } else if(_editMode == "link") {
 
           }
@@ -484,13 +459,15 @@ var ChartView = (function(d3) {
         .on("drag", function(d) {
           d.duration = d.duration + _xScale.invert(d3.event.dx);
           d.duration = Math.max(d.duration, 0);
-          d3.select(this.parentNode).call(_updateEventNode)
-
-          d3.select("#plotPane").selectAll(".link")
-            .call(_updateLinkNode);
+          /*
           d3.select("#" + d.lane.id)
             .call(_updateLaneNode);
-
+          d3.select(this.parentNode)
+            .call(_updateEventNode)
+          d3.select("#plotPane").selectAll(".link")
+            .call(_updateLinkNode);
+          */
+          _updateDisplay();
           d3.select("#console1").text(JSON.stringify(d, function(k,v){if(k=="lane") {return {}} else {return v}}));
           //d3.select("#console2").text(JSON.stringify(d3.event));
           d3.select("#console3").text(d3.mouse(this));

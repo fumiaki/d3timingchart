@@ -2,15 +2,73 @@
 <html>
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>STUDY01</title>
+    <title>STUDY05</title>
     <meta charset="utf-8">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="">
-    <link rel="shortcut icon" href="">
+    <link rel="stylesheet" href="/css/timingChart.css">
+    <script src="/lib/d3/d3.min.js"></script>
+    <script src="/js/ChartModel.js"></script>
+    <script src="/js/ChartView.js"></script>
+
   </head>
   <body>
-    <p>Study01</p>
+
+    <svg id="chart" width="100%" height="100%" style="position: absolute; left: 0px; top: 0px">
+      <defs>
+        <marker id="chartMarker" viewBox="-4 -4 8 8" refX="0" refY="0" markerUnits="userSpaceOnUse" markerWidth="4" markerHeight="4">
+          <circle class="marker" r="4"/>
+        </marker>
+        <marker id="linkArrow" viewBox="-8 -8 16 16" refX="0" refY="0" orient="auto" markerUnits="userSpaceOnUse" markerWidth="32" markerHeight="32">
+          <path class="marker" d="M-8,4 L0,0 L-8,-4"/>
+        </marker>
+      </defs>
+
+      <g transform="translate(0, 0)">
+
+        <g id="backPane" class="background">
+          <rect class="chart" width="480" height="400"/>
+          <rect class="x axis" width="480" height="80"/>
+          <rect class="y axis" width="160" height="400"/>
+        </g>
+
+        <g id="xAxis" class="x axis" transform="translate(160,0)">
+        </g>
+
+        <g id="yAxis" class="y axis" transform="translate(0,80)">
+        </g>
+
+        <g id="plotPane" class="chart" transform="translate(160, 80)">
+          <!--
+          <path d="M0,100 L100,100 L150,50 L250,50 L300,100"></path>
+        -->
+
+        </g>
+      </g>
+    </svg>
+
+    <div  style="position: absolute; left: 0px; bottom: 0px">
+      <h2>Timing Chart</h2>
+      <button type="button" onClick="ChartView.changeEditMode('move')">Move</button>
+      <button type="button" onClick="ChartView.changeEditMode('link')">Link</button>
+      <button type="button" onClick="ChartView.zoomIn()">+</button>
+      <button type="button" onClick="ChartView.zoomOut()">-</button>
+      <button type="button" onClick="ChartView.resetDisplay()">reset</button>
+      <button type="button" onClick="ChartView.changeEditMode('newEvent')">event</button>
+      <p id="console1"></p>
+      <p id="console2"></p>
+      <p id="console3"></p>
+    </div>
+
+    <script>
+    d3.json("./sampleData.json", function(err, json) {
+      console.log("json loaded!");
+
+      var chart = ChartFactory.createChart(json);
+
+      ChartView.init({width:800, xAxis:{height:160},yAxis:{width:160}});
+      ChartView.setData(chart);
+      //ChartView.createView(chart, d3.select("#plotPane"));
+    });
+    </script>
+
   </body>
 </html>

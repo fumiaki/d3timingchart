@@ -1,11 +1,14 @@
-console.log("Hello Node and Docker!");
+const koa = require("koa");
+const app = new koa();
+const serve = require("koa-static");
+const _ = require("koa-route");
 
-const http = require("http");
-const PORT = 8080;
 
-http.createServer((req, res) => {
-	res.writeHead(200, {"Content-Type":"text/html"});
-	res.end("Hello Node on Docker !!");
-}).listen(PORT);
+app.use(_.get("/hello", async ctx => {
+	ctx.body = "Hello Koa2";
+}));
 
-console.log("Server running at port " + PORT);
+app.use(serve("static"));
+
+app.listen(8080);
+console.log("listening on port 8080")
